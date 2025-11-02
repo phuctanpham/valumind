@@ -4,6 +4,8 @@
     "id": "item-1",
     "avatar": "https://i.pravatar.cc/150?img=1",
     "address": "101 Đ. Nguyễn Huệ, Bến Nghé, Quận 1, Thành phố Hồ Chí Minh",
+    "lat": 10.7752,
+    "lng": 106.7031,
     "certificateNumber": "C-12345",
     "owner": "Phạm Tấn Phúc",
     "syncStatus": "synced",
@@ -18,9 +20,9 @@
       }
     },
     "nearbyValuations": [
-      { "address": "105 Đ. Nguyễn Huệ", "value": 36000000000 },
-      { "address": "95 Đ. Nguyễn Huệ", "value": 34500000000 },
-      { "address": "80 Đ. Nguyễn Huệ", "value": 37000000000 }
+      { "address": "105 Đ. Nguyễn Huệ", "value": 36000000000, "lat": 10.7755, "lng": 106.7033 },
+      { "address": "95 Đ. Nguyễn Huệ", "value": 34500000000, "lat": 10.7749, "lng": 106.7029 },
+      { "address": "80 Đ. Nguyễn Huệ", "value": 37000000000, "lat": 10.7744, "lng": 106.7024 }
     ],
     "chatHistory": [
       {
@@ -74,6 +76,8 @@
     "id": "item-2",
     "avatar": "https://i.pravatar.cc/150?img=2",
     "address": "285 Đ. Cách Mạng Tháng 8, Phường 12, Quận 10, Thành phố Hồ Chí Minh",
+    "lat": 10.7798,
+    "lng": 106.6749,
     "certificateNumber": "C-67890",
     "owner": "Lê Thị B",
     "syncStatus": "failed",
@@ -88,9 +92,9 @@
       }
     },
     "nearbyValuations": [
-      { "address": "283 Đ. Cách Mạng Tháng 8", "value": 11800000000 },
-      { "address": "287 Đ. Cách Mạng Tháng 8", "value": 12200000000 },
-      { "address": "290 Đ. Cách Mạng Tháng 8", "value": 12500000000 }
+      { "address": "283 Đ. Cách Mạng Tháng 8", "value": 11800000000, "lat": 10.7796, "lng": 106.6747 },
+      { "address": "287 Đ. Cách Mạng Tháng 8", "value": 12200000000, "lat": 10.7800, "lng": 106.6751 },
+      { "address": "290 Đ. Cách Mạng Tháng 8", "value": 12500000000, "lat": 10.7803, "lng": 106.6754 }
     ],
     "chatHistory": [
       {
