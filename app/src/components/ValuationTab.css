@@ -1,3 +1,9 @@
+.valuation-tab {
+  height: 100vh; /* Make tab content full height */
+  overflow-y: auto; /* Allow vertical scrolling */
+  padding: 1rem;
+}
+
 /* General card styling */
 .valuation-tab .infographic-card {
   background-color: #f9f9f9;
