@@ -148,5 +148,40 @@
       { "activity": "Hồ sơ trước đó bị từ chối. Lý do: Thiếu tài liệu.", "timestamp": "2024-07-24T18:00:00Z" },
       { "activity": "Mục 'C-67890' đã được tạo.", "timestamp": "2024-07-22T08:40:00Z" }
     ]
+  },
+  {
+    "id": "item-3",
+    "avatar": "https://i.pravatar.cc/150?img=3",
+    "address": "8A Đ. Thái Văn Lung, Bến Nghé, Quận 1, Thành phố Hồ Chí Minh",
+    "lat": 10.7791,
+    "lng": 106.7042,
+    "certificateNumber": "C-54321",
+    "owner": "Trần Văn C",
+    "syncStatus": "synced",
+    "valuation": {
+      "aiModel": "ValuProphet v2.1",
+      "confidenceScore": 0.92,
+      "totalValue": 28000000000,
+      "unitValue": 280000000,
+      "valueChange": {
+        "percent": 2.1,
+        "period": "month"
+      }
+    },
+    "nearbyValuations": [
+      { "address": "10 Đ. Thái Văn Lung", "value": 29000000000, "lat": 10.7793, "lng": 106.7044 },
+      { "address": "6 Đ. Thái Văn Lung", "value": 27500000000, "lat": 10.7789, "lng": 106.7040 },
+      { "address": "12 Đ. Thái Văn Lung", "value": 30000000000, "lat": 10.7795, "lng": 106.7046 }
+    ],
+    "chatHistory": [
+      {
+        "sender": "bot",
+        "message": "Chào mừng. Quá trình thẩm định giá ban đầu cho tài sản của bạn đã hoàn tất. Để tiếp tục với hồ sơ vay vốn, vui lòng tải lên các tài liệu cần thiết.",
+        "timestamp": "2024-07-28T10:00:00Z"
+      }
+    ],
+    "activityLogs": [
+      { "activity": "Hồ sơ vay vốn đã được nộp để xem xét lần cuối.", "timestamp": "2024-07-30T11:02:00Z" }
+    ]
   }
 ]
