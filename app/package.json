@@ -13,9 +13,11 @@
 	},
 	"dependencies": {
 		"@types/google.maps": "^3.58.1",
+		"@types/recharts": "^1.8.29",
 		"@vis.gl/react-google-maps": "^1.7.0",
 		"react": "^19.1.1",
-		"react-dom": "^19.1.1"
+		"react-dom": "^19.1.1",
+		"recharts": "^3.3.0"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.33.0",
