@@ -1,5 +1,5 @@
 
-.infographic-card {
+.infographic-card.compact {
   background-color: #f9f9f9;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
@@ -7,53 +7,54 @@
   margin-bottom: 16px;
 }
 
-.infographic-card h2 {
-  font-size: 1.2em;
-  margin-top: 0;
+.main-valuation {
+  text-align: center;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 12px;
   margin-bottom: 12px;
+}
+
+.total-value {
+  font-size: 2em;
+  font-weight: bold;
   color: #333;
 }
 
-.valuation-details {
-  width: 100%;
+.value-change {
+  font-size: 0.9em;
+  margin-top: 4px;
 }
 
-.detail-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 0;
-  border-bottom: 1px solid #e9e9e9;
-}
-
-.detail-item:last-child {
-  border-bottom: none;
-}
-
-.detail-label {
-  font-weight: 600;
-  color: #555;
-}
-
-.detail-value {
-  text-align: right;
-}
-
-.detail-value-focus {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  font-weight: bold;
-}
-
-.increment {
+.value-change.increment {
   color: #4CAF50;
-  margin-left: 8px;
-  font-size: 0.9em;
 }
 
-.decrement {
+.value-change.decrement {
   color: #F44336;
-  margin-left: 8px;
-  font-size: 0.9em;
+}
+
+.valuation-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.grid-item {
+  background-color: #fff;
+  padding: 12px;
+  border-radius: 6px;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.grid-label {
+  font-size: 0.8em;
+  color: #666;
+  margin-bottom: 6px;
+}
+
+.grid-value {
+  font-size: 1.1em;
+  font-weight: 600;
+  color: #333;
 }

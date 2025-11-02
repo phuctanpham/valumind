@@ -1,25 +1,59 @@
 
-.infographic-card {
-  background-color: #f9f9f9;
+.geography-card {
+  display: flex;
+  height: 400px; /* Adjust as needed */
   border: 1px solid #e0e0e0;
   border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 16px;
-}
-
-.infographic-card h2 {
-  font-size: 1.2em;
-  margin-top: 0;
-  margin-bottom: 12px;
-  color: #333;
-}
-
-.map-container {
-  height: 300px;
-  width: 100%;
-  border-radius: 4px;
   overflow: hidden;
-  margin-bottom: 16px;
+}
+
+.map-view-container {
+  flex: 3;
+  background-color: #f0f0f0;
+}
+
+.nearby-list-container {
+  flex: 2;
+  background-color: #f9f9f9;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid #e0e0e0;
+}
+
+.nearby-list-container h4 {
+  margin: 0;
+  padding: 12px;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 1.1em;
+}
+
+.nearby-list {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+}
+
+.nearby-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.nearby-item:last-child {
+  border-bottom: none;
+}
+
+.nearby-address {
+  font-size: 0.9em;
+}
+
+.nearby-value {
+  font-weight: 600;
+  font-size: 0.9em;
+  white-space: nowrap;
 }
 
 .api-key-placeholder {
@@ -27,7 +61,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #f0f0f0;
   text-align: center;
   padding: 20px;
 }
@@ -50,30 +83,4 @@
 
 .marker-nearby {
   background-color: #28a745;
-}
-
-.map-container .gm-style-moc {
-  height: 100%;
-  width: 100%;
-}
-
-.nearby-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.nearby-table th,
-.nearby-table td {
-  padding: 8px 12px;
-  text-align: left;
-  border-bottom: 1px solid #ddd;
-}
-
-.nearby-table th {
-  background-color: #f2f2f2;
-}
-
-.nearby-table td:last-child {
-  text-align: right;
-  font-weight: bold;
 }

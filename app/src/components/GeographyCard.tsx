@@ -25,22 +25,18 @@ const formatCurrency = (value: number) => {
 };
 
 export default function GeographyCard({ lat, lng, valuation, nearbyValuations }: GeographyCardProps) {
-  const API_KEY = "YOUR_GOOGLE_MAPS_API_KEY"; // Please replace with your actual API key
+  const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
   return (
-    <div className="infographic-card">
-      <h2>Nearby Valuations</h2>
-      <div className="map-container">
-        {API_KEY === 'YOUR_GOOGLE_MAPS_API_KEY' ? (
-          <div className="api-key-placeholder">
-            <p>Please replace "YOUR_GOOGLE_MAPS_API_KEY" in GeographyCard.tsx with your actual Google Maps API key to see the map.</p>
-          </div>
-        ) : (
+    <div className="infographic-card geography-card">
+      <div className="map-view-container">
+        {API_KEY ? (
           <APIProvider apiKey={API_KEY}>
             <Map
               defaultCenter={{ lat, lng }}
               defaultZoom={15}
               mapId="bf51a910020fa25a"
+              disableDefaultUI={true}
             >
               <AdvancedMarker position={{ lat, lng }} title={'Main Property'}>
                 <div className="marker marker-main">
@@ -60,24 +56,23 @@ export default function GeographyCard({ lat, lng, valuation, nearbyValuations }:
               ))}
             </Map>
           </APIProvider>
+        ) : (
+          <div className="api-key-placeholder">
+            <p>Google Maps API Key not configured.</p>
+          </div>
         )}
       </div>
-      <table className="nearby-table">
-        <thead>
-          <tr>
-            <th>Address</th>
-            <th>Value (VND)</th>
-          </tr>
-        </thead>
-        <tbody>
+      <div className="nearby-list-container">
+        <h4>Nearby Valuations</h4>
+        <ul className="nearby-list">
           {nearbyValuations.map((nearby, index) => (
-            <tr key={index}>
-              <td>{nearby.address}</td>
-              <td>{formatCurrency(nearby.value)}</td>
-            </tr>
+            <li key={index} className="nearby-item">
+              <span className="nearby-address">{nearby.address}</span>
+              <span className="nearby-value">{formatCurrency(nearby.value)}</span>
+            </li>
           ))}
-        </tbody>
-      </table>
+        </ul>
+      </div>
     </div>
   );
 }

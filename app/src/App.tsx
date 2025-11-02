@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import TopBar from './components/TopBar';
 import RightColumn from './components/RightColumn';
@@ -23,6 +24,7 @@ interface CellItem {
   certificateNumber: string;
   owner: string;
   syncStatus: SyncStatus;
+  customFields?: { [key: string]: string };
 }
 
 type AppState = 'loading' | 'login' | 'main';
@@ -145,7 +147,7 @@ function App() {
     setItems(prev => [...prev, item]);
   };
 
-  const handleUpdateItem = (id: string, field: string, value: string) => {
+  const handleUpdateItem = (id: string, field: string, value: any) => {
     setItems(prev => prev.map(item => item.id === id ? { ...item, [field]: value } : item));
   };
 

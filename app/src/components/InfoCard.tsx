@@ -25,29 +25,25 @@ export default function InfoCard({ valuation }: InfoCardProps) {
   const valueChangeClass = isIncrement ? 'increment' : 'decrement';
 
   return (
-    <div className="infographic-card">
-      <h2>AI Valuation Model</h2>
-      <div className="valuation-details">
-        <div className="detail-item">
-          <span className="detail-label">AI Model</span>
-          <span className="detail-value">{valuation.aiModel}</span>
+    <div className="infographic-card compact">
+      <div className="main-valuation">
+        <div className="total-value">{formatCurrency(valuation.totalValue)}</div>
+        <div className={`value-change ${valueChangeClass}`}>
+          ({isIncrement ? '+' : ''}{valuation.valueChange.percent}% vs {valuation.valueChange.period})
         </div>
-        <div className="detail-item">
-          <span className="detail-label">Confidence Score</span>
-          <span className="detail-value">{(valuation.confidenceScore * 100).toFixed(0)}%</span>
+      </div>
+      <div className="valuation-grid">
+        <div className="grid-item">
+          <div className="grid-label">Confidence Score</div>
+          <div className="grid-value">{(valuation.confidenceScore * 100).toFixed(0)}%</div>
         </div>
-        <div className="detail-item">
-          <span className="detail-label">Total Value (VND)</span>
-          <div className="detail-value-focus">
-            <span>{formatCurrency(valuation.totalValue)}</span>
-            <span className={valueChangeClass}>
-              ({isIncrement ? '+' : ''}{valuation.valueChange.percent}%)
-            </span>
-          </div>
+        <div className="grid-item">
+          <div className="grid-label">AI Model</div>
+          <div className="grid-value">{valuation.aiModel}</div>
         </div>
-        <div className="detail-item">
-          <span className="detail-label">Unit Value (VND/m²)</span>
-          <span className="detail-value">{formatCurrency(valuation.unitValue)}</span>
+        <div className="grid-item">
+          <div className="grid-label">Unit Value</div>
+          <div className="grid-value">{formatCurrency(valuation.unitValue)}/m²</div>
         </div>
       </div>
     </div>

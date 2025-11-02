@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import DetailTab from './DetailTab';
 import ValuationTab from './ValuationTab';
@@ -9,12 +10,13 @@ interface CellItem {
   address: string;
   certificateNumber: string;
   owner: string;
+  customFields?: { [key: string]: string };
 }
 
 interface MiddleColumnProps {
   selectedItem: CellItem | undefined;
   onNavigate?: () => void;
-  onUpdateItem: (id: string, field: string, value: string) => void;
+  onUpdateItem: (id: string, field: string, value: any) => void;
   apiValid: boolean;
 }
 
@@ -42,7 +44,7 @@ export default function MiddleColumn({
     );
   }
 
-  const handleUpdate = (field: string, value: string) => {
+  const handleUpdate = (field: string, value: any) => {
     onUpdateItem(selectedItem.id, field, value);
   };
 
