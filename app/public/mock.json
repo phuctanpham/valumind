@@ -1,0 +1,19 @@
+
+[
+  {
+    "id": "item-1",
+    "avatar": "https://i.pravatar.cc/150?img=1",
+    "address": "123 Main St, Anytown, USA",
+    "certificateNumber": "C-12345",
+    "owner": "John Doe",
+    "syncStatus": "synced"
+  },
+  {
+    "id": "item-2",
+    "avatar": "https://i.pravatar.cc/150?img=2",
+    "address": "456 Oak Ave, Somewhere, USA",
+    "certificateNumber": "C-67890",
+    "owner": "Jane Smith",
+    "syncStatus": "pending"
+  }
+]
