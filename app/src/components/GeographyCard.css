@@ -2,29 +2,32 @@
 .geography-card {
   display: flex;
   height: 400px; /* Adjust as needed */
-  border: 1px solid #e0e0e0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   overflow: hidden;
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #fff;
 }
 
 .map-view-container {
   flex: 3;
-  background-color: #f0f0f0;
+  background-color: rgba(0, 0, 0, 0.2);
 }
 
 .nearby-list-container {
   flex: 2;
-  background-color: #f9f9f9;
+  background-color: transparent;
   display: flex;
   flex-direction: column;
-  border-left: 1px solid #e0e0e0;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .nearby-list-container h4 {
   margin: 0;
   padding: 12px;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   font-size: 1.1em;
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
 .nearby-list {
@@ -39,7 +42,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 10px 12px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .nearby-item:last-child {
@@ -48,12 +51,14 @@
 
 .nearby-address {
   font-size: 0.9em;
+  color: #ccc;
 }
 
 .nearby-value {
   font-weight: 600;
   font-size: 0.9em;
   white-space: nowrap;
+  color: #fff;
 }
 
 .api-key-placeholder {
@@ -63,6 +68,7 @@
   justify-content: center;
   text-align: center;
   padding: 20px;
+  color: #aaa;
 }
 
 .marker {

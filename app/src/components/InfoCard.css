@@ -1,15 +1,16 @@
 
 .infographic-card.compact {
-  background-color: #f9f9f9;
-  border: 1px solid #e0e0e0;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   padding: 16px;
   margin-bottom: 16px;
+  color: #fff;
 }
 
 .main-valuation {
   text-align: center;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   padding-bottom: 12px;
   margin-bottom: 12px;
 }
@@ -17,7 +18,7 @@
 .total-value {
   font-size: 2em;
   font-weight: bold;
-  color: #333;
+  color: #fff;
 }
 
 .value-change {
@@ -40,7 +41,7 @@
 }
 
 .grid-item {
-  background-color: #fff;
+  background-color: rgba(255, 255, 255, 0.08);
   padding: 12px;
   border-radius: 6px;
   text-align: center;
@@ -49,12 +50,12 @@
 
 .grid-label {
   font-size: 0.8em;
-  color: #666;
+  color: #aaa;
   margin-bottom: 6px;
 }
 
 .grid-value {
   font-size: 1.1em;
   font-weight: 600;
-  color: #333;
+  color: #fff;
 }
