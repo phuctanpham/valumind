@@ -1,5 +1,17 @@
+
 import { useState } from 'react';
 import './LeftColumn.css';
+
+interface ChatMessage {
+  sender: 'user' | 'bot';
+  message: string;
+  timestamp: string;
+}
+
+interface ActivityLog {
+  activity: string;
+  timestamp: string;
+}
 
 interface CellItem {
   id: string;
@@ -7,6 +19,8 @@ interface CellItem {
   address: string;
   certificateNumber: string;
   owner: string;
+  chatHistory?: ChatMessage[];
+  activityLogs?: ActivityLog[];
 }
 
 interface LeftColumnProps {
@@ -16,7 +30,7 @@ interface LeftColumnProps {
   onNavigate?: () => void;
 }
 
-type Tab = 'chat' | 'changelog';
+type Tab = 'chat' | 'activity';
 
 export default function LeftColumn({
   selectedItem,
@@ -27,26 +41,10 @@ export default function LeftColumn({
   const [activeTab, setActiveTab] = useState<Tab>('chat');
   const [chatMessage, setChatMessage] = useState('');
 
-  // Mock data - in production, fetch from backend
-  const chatHistory = selectedItem
-    ? [
-        { id: 1, sender: 'user', message: 'What is the status of this item?', timestamp: '10:30 AM' },
-        { id: 2, sender: 'bot', message: 'This item is active and verified.', timestamp: '10:31 AM' },
-      ]
-    : [];
-
-  const changelogEntries = selectedItem
-    ? [
-        { id: 1, action: 'Created', user: 'System', timestamp: '2025-10-20 09:00' },
-        { id: 2, action: 'Updated certificate number', user: 'Admin', timestamp: '2025-10-22 14:30' },
-      ]
-    : [];
-
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (!chatMessage.trim()) return;
     
-    // TODO: Send message to bot backend via Service Worker proxy
     console.log('Sending message:', chatMessage);
     setChatMessage('');
   };
@@ -92,9 +90,9 @@ export default function LeftColumn({
               Chat
             </button>
             <button
-              className={`tab ${activeTab === 'changelog' ? 'active' : ''}`}
-              onClick={() => setActiveTab('changelog')}
-              aria-label="Changelog tab"
+              className={`tab ${activeTab === 'activity' ? 'active' : ''}`}
+              onClick={() => setActiveTab('activity')}
+              aria-label="Activity tab"
             >
               Activity
             </button>
@@ -108,10 +106,10 @@ export default function LeftColumn({
                   <p className="chat-subtitle">Ask about {selectedItem.certificateNumber}</p>
                 </div>
                 <div className="chat-messages">
-                  {chatHistory.map((msg) => (
-                    <div key={msg.id} className={`chat-message ${msg.sender}`}>
+                  {selectedItem.chatHistory?.map((msg, index) => (
+                    <div key={index} className={`chat-message ${msg.sender}`}>
                       <div className="message-content">{msg.message}</div>
-                      <div className="message-timestamp">{msg.timestamp}</div>
+                      <div className="message-timestamp">{new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
                     </div>
                   ))}
                 </div>
@@ -136,12 +134,11 @@ export default function LeftColumn({
                   <p className="changelog-subtitle">{selectedItem.certificateNumber}</p>
                 </div>
                 <div className="changelog-entries">
-                  {changelogEntries.map((entry) => (
-                    <div key={entry.id} className="changelog-entry">
-                      <div className="entry-action">{entry.action}</div>
+                  {selectedItem.activityLogs?.map((entry, index) => (
+                    <div key={index} className="changelog-entry">
+                      <div className="entry-action">{entry.activity}</div>
                       <div className="entry-meta">
-                        <span className="entry-user">{entry.user}</span>
-                        <span className="entry-timestamp">{entry.timestamp}</span>
+                        <span className="entry-timestamp">{new Date(entry.timestamp).toLocaleString()}</span>
                       </div>
                     </div>
                   ))}

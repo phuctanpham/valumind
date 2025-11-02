@@ -16,7 +16,43 @@
         "percent": 1.5,
         "period": "month"
       }
-    }
+    },
+    "chatHistory": [
+      {
+        "sender": "bot",
+        "message": "Welcome to ValuProphet. I am your virtual appraisal assistant. How can I help you with item C-12345?",
+        "timestamp": "2024-07-28T10:00:00Z"
+      },
+      {
+        "sender": "user",
+        "message": "What is the status of this item?",
+        "timestamp": "2024-07-28T10:05:00Z"
+      },
+      {
+        "sender": "bot",
+        "message": "This item is active and verified. We have completed the initial valuation. To proceed with a lending proposal, please upload the required documents.",
+        "timestamp": "2024-07-28T10:06:00Z"
+      },
+      {
+        "sender": "user",
+        "message": "I've just uploaded the Certificate of Title and the Floor Plan.",
+        "timestamp": "2024-07-29T14:30:00Z"
+      },
+      {
+        "sender": "bot",
+        "message": "Thank you, John. Documents received. Our team will review them and get back to you with a lending proposal within 2 business days.",
+        "timestamp": "2024-07-29T14:32:00Z"
+      }
+    ],
+    "activityLogs": [
+      { "activity": "Lending proposal sent.", "timestamp": "2024-07-31T11:00:00Z" },
+      { "activity": "Appraiser team reviewed documents.", "timestamp": "2024-07-30T16:00:00Z" },
+      { "activity": "User uploaded 'Floor_Plan.pdf'.", "timestamp": "2024-07-29T14:29:00Z" },
+      { "activity": "User uploaded 'Certificate_of_Title.pdf'.", "timestamp": "2024-07-29T14:28:00Z" },
+      { "activity": "Valuation completed by AI model 'ValuProphet v2.1'.", "timestamp": "2024-07-28T09:00:00Z" },
+      { "activity": "Valuation request initiated.", "timestamp": "2024-07-28T08:30:00Z" },
+      { "activity": "Item 'C-12345' created.", "timestamp": "2024-07-28T08:25:00Z" }
+    ]
   },
   {
     "id": "item-2",
@@ -34,6 +70,29 @@
         "percent": -0.5,
         "period": "month"
       }
-    }
+    },
+    "chatHistory": [
+       {
+        "sender": "bot",
+        "message": "Welcome, Jane. Your property at 456 Oak Ave is currently pending verification. Please upload the necessary documents to proceed.",
+        "timestamp": "2024-07-30T09:15:00Z"
+      },
+      {
+        "sender": "user",
+        "message": "What documents do you need?",
+        "timestamp": "2024-07-30T09:20:00Z"
+      },
+      {
+        "sender": "bot",
+        "message": "We require a copy of the Certificate of Title and a recent property tax assessment.",
+        "timestamp": "2024-07-30T09:21:00Z"
+      }
+    ],
+    "activityLogs": [
+      { "activity": "Awaiting document submission from owner.", "timestamp": "2024-07-30T09:15:00Z" },
+      { "activity": "Initial valuation completed by AI model 'ValuProphet v2.1'.", "timestamp": "2024-07-30T09:00:00Z" },
+      { "activity": "Valuation request initiated.", "timestamp": "2024-07-30T08:45:00Z" },
+      { "activity": "Item 'C-67890' created.", "timestamp": "2024-07-30T08:40:00Z" }
+    ]
   }
 ]
