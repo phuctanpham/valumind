@@ -1,10 +1,18 @@
 import { useState } from 'react';
 import './TopBar.css';
+import './InfoCard.css';
 
 interface TopBarProps {
   onMenuClick: () => void;
   onSearch: (query: string) => void;
 }
+
+const InfoCard = ({ title, value }: { title: string; value: string }) => (
+  <div className="info-card">
+    <div className="info-card-title">{title}</div>
+    <div className="info-card-value">{value}</div>
+  </div>
+);
 
 export default function TopBar({ onMenuClick, onSearch }: TopBarProps) {
   const [searchQuery, setSearchQuery] = useState('');
@@ -28,6 +36,11 @@ export default function TopBar({ onMenuClick, onSearch }: TopBarProps) {
             aria-label="Search"
           />
         </form>
+      </div>
+      <div className="topbar-center">
+        <InfoCard title="Total Items" value="1,234" />
+        <InfoCard title="Pending Sync" value="56" />
+        <InfoCard title="Valuation" value="$1.2M" />
       </div>
       <div className="topbar-right">
         <button

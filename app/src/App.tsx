@@ -34,19 +34,7 @@ function App() {
   const [config, setConfig] = useState<EndpointsConfig | null>(null);
   const [loadingProgress, setLoadingProgress] = useState(0);
   
-  const [items, setItems] = useState<CellItem[]>(() => {
-    const savedItems = localStorage.getItem('items');
-    if (savedItems) {
-      return JSON.parse(savedItems);
-    }
-    // Load mock data for guest mode on first load
-    if (authMode === 'guest') {
-      fetch('/mock.json')
-        .then(response => response.json())
-        .then(data => setItems(data));
-    }
-    return [];
-  });
+  const [items, setItems] = useState<CellItem[]>([]);
   
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -58,7 +46,9 @@ function App() {
 
   // Persist items to local storage
   useEffect(() => {
-    localStorage.setItem('items', JSON.stringify(items));
+    if (items.length > 0) {
+      localStorage.setItem('items', JSON.stringify(items));
+    }
   }, [items]);
 
   // Initialize app
@@ -76,6 +66,18 @@ function App() {
           navigator.serviceWorker.addEventListener('controllerchange', () => resolve(true));
           setTimeout(() => resolve(true), 2000);
         });
+
+        const savedItems = localStorage.getItem('items');
+        if (savedItems) {
+          const parsedItems = JSON.parse(savedItems);
+          setItems(parsedItems);
+          setSelectedItemId(parsedItems[0]?.id || null);
+        } else if (authMode === 'guest') {
+          const response = await fetch('/mock.json');
+          const data = await response.json();
+          setItems(data);
+          setSelectedItemId(data[0]?.id || null);
+        }
 
         setLoadingProgress(100);
         await new Promise(resolve => setTimeout(resolve, 500));
@@ -133,7 +135,6 @@ function App() {
 
   const handleAddItem = (newItem: Omit<CellItem, 'id' | 'syncStatus'>) => {
     if (authMode === 'guest' && items.length >= 2) {
-      // Limit guest mode to 2 items
       return;
     }
     const item: CellItem = {
