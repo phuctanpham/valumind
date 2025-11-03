@@ -67,7 +67,7 @@ export default function MiddleColumn({
       <div className="middle-column empty-state-container">
         <div className="empty-state">
           <h2>No Item Selected</h2>
-          <p>Select an item from the right panel to view details</p>
+          <p>Select an item from the left panel to view details</p>
           {onNavigate && (
             <button className="btn btn-primary" onClick={onNavigate}>
               Go to Items
@@ -90,7 +90,6 @@ export default function MiddleColumn({
             className={`tab-button ${activeTab === 'detail' ? 'active' : ''}`}
             onClick={() => handleTabChange('detail')}
             >
-            {flags.DetailTab_editSwitch && <span className="gear-icon" onClick={() => setIsEditing(!isEditing)}></span>}
             Detail
             </button>
             <button
@@ -100,6 +99,11 @@ export default function MiddleColumn({
             Valuation
             </button>
         </div>
+        {activeTab === 'detail' && flags.DetailTab_editSwitch && (
+            <div className="edit-gear-container">
+                <span className="gear-icon" onClick={() => setIsEditing(!isEditing)}></span>
+            </div>
+        )}
       </div>
       <div className="tab-content">
         {activeTab === 'detail' && (

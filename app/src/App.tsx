@@ -1,9 +1,9 @@
 
 import { useState, useEffect } from 'react';
 import TopBar from './components/TopBar';
-import RightColumn from './components/RightColumn';
-import MiddleColumn from './components/MiddleColumn';
 import LeftColumn from './components/LeftColumn';
+import MiddleColumn from './components/MiddleColumn';
+import RightColumn from './components/RightColumn';
 import FloatingBubble from './components/FloatingBubble';
 import './App.css';
 
@@ -40,7 +40,7 @@ function App() {
   
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [mobileColumn, setMobileColumn] = useState<'left' | 'middle' | 'right'>('right');
+  const [mobileColumn, setMobileColumn] = useState<'left' | 'middle' | 'right'>('left');
   const [leftExpanded, setLeftExpanded] = useState(true);
   const [rightExpanded, setRightExpanded] = useState(true);
   const [showApiNotification, setShowApiNotification] = useState(false);
@@ -112,11 +112,11 @@ function App() {
       const touchEndX = e.changedTouches[0].screenX;
       const swipeThreshold = 50;
       if (touchStartX - touchEndX > swipeThreshold) {
-        if (mobileColumn === 'right') setMobileColumn('middle');
-        else if (mobileColumn === 'middle') setMobileColumn('left');
-      } else if (touchEndX - touchStartX > swipeThreshold) {
         if (mobileColumn === 'left') setMobileColumn('middle');
         else if (mobileColumn === 'middle') setMobileColumn('right');
+      } else if (touchEndX - touchStartX > swipeThreshold) {
+        if (mobileColumn === 'right') setMobileColumn('middle');
+        else if (mobileColumn === 'middle') setMobileColumn('left');
       }
     };
 
@@ -185,15 +185,15 @@ function App() {
       <div className={`main-content ${isMobile ? 'mobile' : 'desktop'}`}>
         {isMobile ? (
           <>
-            {mobileColumn === 'left' && <LeftColumn selectedItem={selectedItem} onNavigate={() => setMobileColumn('middle')} />}
-            {mobileColumn === 'middle' && <MiddleColumn selectedItem={selectedItem} onUpdateItem={handleUpdateItem} apiValid={config?.API_ENDPOINT_CONFIG ?? false} onNavigate={() => setMobileColumn('right')} />}
-            {mobileColumn === 'right' && <RightColumn items={items} selectedItemId={selectedItemId} onSelectItem={handleSelectItem} onSync={handleSync} onBulkEdit={setBulkEditIds} bulkSelectedIds={bulkEditIds} />}
+            {mobileColumn === 'left' && <LeftColumn items={items} selectedItemId={selectedItemId} onSelectItem={handleSelectItem} onSync={handleSync} onBulkEdit={setBulkEditIds} bulkSelectedIds={bulkEditIds} />}
+            {mobileColumn === 'middle' && <MiddleColumn selectedItem={selectedItem} onUpdateItem={handleUpdateItem} apiValid={config?.API_ENDPOINT_CONFIG ?? false} onNavigate={() => setMobileColumn('left')} />}
+            {mobileColumn === 'right' && <RightColumn selectedItem={selectedItem} onNavigate={() => setMobileColumn('middle')} />}
           </>
         ) : (
           <>
-            <RightColumn items={items} selectedItemId={selectedItemId} onSelectItem={handleSelectItem} onSync={handleSync} expanded={leftExpanded} onToggleExpand={() => setLeftExpanded(!leftExpanded)} onBulkEdit={setBulkEditIds} bulkSelectedIds={bulkEditIds} />
+            <LeftColumn items={items} selectedItemId={selectedItemId} onSelectItem={handleSelectItem} onSync={handleSync} expanded={leftExpanded} onToggleExpand={() => setLeftExpanded(!leftExpanded)} onBulkEdit={setBulkEditIds} bulkSelectedIds={bulkEditIds} />
             <MiddleColumn selectedItem={selectedItem} onUpdateItem={handleUpdateItem} apiValid={config?.API_ENDPOINT_CONFIG ?? false} />
-            <LeftColumn selectedItem={selectedItem} expanded={rightExpanded} onToggleExpand={() => setRightExpanded(!rightExpanded)} />
+            <RightColumn selectedItem={selectedItem} expanded={rightExpanded} onToggleExpand={() => setRightExpanded(!rightExpanded)} />
           </>
         )}
       </div>

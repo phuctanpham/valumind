@@ -47,7 +47,7 @@ export default function RightColumn({
       <div className={`right-column ${expanded ? 'expanded' : 'collapsed'}`}>
         {onToggleExpand && (
           <button className="toggle-button" onClick={onToggleExpand} aria-label="Toggle column">
-            {expanded ? '←' : '→'}
+            {expanded ? '→' : '←'}
           </button>
         )}
         {expanded && (
@@ -69,7 +69,7 @@ export default function RightColumn({
     <div className={`right-column ${expanded ? 'expanded' : 'collapsed'}`}>
       {onToggleExpand && (
         <button className="toggle-button" onClick={onToggleExpand} aria-label="Toggle column">
-          {expanded ? '←' : '→'}
+          {expanded ? '→' : '←'}
         </button>
       )}
       {expanded && (
