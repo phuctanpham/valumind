@@ -1,9 +1,9 @@
 {
     "status": "SUCCESS",
     "message": "Quy trình huấn luyện và lưu model hoàn tất.",
-    "timestamp_utc": "2025-10-26T13:31:25.717436",
+    "timestamp_utc": "2025-11-01T14:01:48.634890",
     "metrics": {
-        "mean_absolute_error": 5224786.788934295,
-        "r2_score": 0.9997918474980246
+        "mean_absolute_error": 74236173.59405729,
+        "r2_score": 0.9908730784459187
     }
 }

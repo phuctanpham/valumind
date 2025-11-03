@@ -1,8 +1,8 @@
 {
-    "model_version": "1.1.0",
+    "model_version": "1.2.0",
     "training_data_shape": "(1600, 12)",
     "performance_metrics": {
-        "mean_absolute_error": 5224786.788934295,
-        "r2_score": 0.9997918474980246
+        "mean_absolute_error": 74236173.59405729,
+        "r2_score": 0.9908730784459187
     }
 }

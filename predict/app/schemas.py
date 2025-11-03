@@ -1,44 +1,35 @@
 # app/schemas.py
-
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List, Dict, Any
 
-# Schema cho dữ liệu đầu vào, phản ánh đúng các features cần thiết
 class RealEstateFeatures(BaseModel):
-    # Numerical features
-    size: float = Field(..., description="Diện tích đất (m2)")
-    longitude: float = Field(..., description="Kinh độ (Longitude)")
-    latitude: float = Field(..., description="Vĩ độ (Latitude)")
-    living_size: Optional[float] = Field(None, description="Diện tích sử dụng (m2)")
-    width: Optional[float] = Field(None, description="Chiều rộng (m)")
-    length: Optional[float] = Field(None, description="Chiều dài (m)")
-    rooms: Optional[float] = Field(None, description="Số phòng") # Dùng float vì dữ liệu gốc là float
-    toilets: Optional[float] = Field(None, description="Số toilet")
-    floors: Optional[float] = Field(None, description="Số tầng")
+    size: float = Field(..., example=90, description="Diện tích đất (m²)")
+    living_size: Optional[float] = Field(None, example=270, description="Diện tích sử dụng (m²)")
+    width: Optional[float] = Field(None, example=4, description="Chiều rộng (m)")
+    length: Optional[float] = Field(None, example=22, description="Chiều dài (m)")
+    rooms: Optional[int] = Field(None, example=5, description="Số phòng ngủ")
+    toilets: Optional[int] = Field(None, example=5, description="Số phòng vệ sinh")
+    floors: Optional[int] = Field(None, example=4, description="Số tầng")
+    longitude: float = Field(..., example=106.65461, description="Kinh độ")
+    latitude: float = Field(..., example=10.864375, description="Vĩ độ")
+    category: str = Field(..., example="Nhà riêng", description="Loại bất động sản (vd: 'Nhà riêng', 'Căn hộ/Chung cư')")
+    region: str = Field(..., example="TP.HCM", description="Tỉnh/Thành phố")
+    area: str = Field(..., example="Quận 12", description="Quận/Huyện")
 
-    # Categorical features
-    category: str = Field(..., description="Loại hình bất động sản (VD: 'Nhà riêng')")
-    region: str = Field(..., description="Tỉnh/Thành phố (VD: 'Hà Nội')")
-    area: str = Field(..., description="Quận/Huyện (VD: 'Quận Đống Đa')")
+# <<< THÊM MỚI/CẬP NHẬT CÁC SCHEMA DƯỚI ĐÂY >>>
 
-    class Config:
-        schema_extra = {
-            "example": {
-                "size": 85.5,
-                "longitude": 105.80,
-                "latitude": 21.01,
-                "living_size": 250.0,
-                "width": 5.0,
-                "length": 17.1,
-                "rooms": 4,
-                "toilets": 3,
-                "floors": 3,
-                "category": "Nhà riêng",
-                "region": "Hà Nội",
-                "area": "Quận Ba Đình"
-            }
-        }
+class ShapFactor(BaseModel):
+    """Mô tả một yếu tố ảnh hưởng đến giá"""
+    feature: str = Field(..., example="area", description="Tên đặc trưng")
+    value: Any = Field(..., example="Quận 12", description="Giá trị của đặc trưng")
+    shap_value: float = Field(..., example=1800500000, description="Giá trị SHAP (mức độ ảnh hưởng đến giá, đơn vị VNĐ)")
+    
+class PredictionAnalysis(BaseModel):
+    """Kết quả phân tích chi tiết của dự đoán"""
+    base_price_vnd: float = Field(..., example=3517112269, description="Giá khởi điểm (trung bình thị trường) VNĐ")
+    factors: List[ShapFactor] = Field(..., description="Danh sách các yếu tố ảnh hưởng, sắp xếp theo mức độ quan trọng")
 
-# Schema cho kết quả trả về
 class PredictionResponse(BaseModel):
-    estimated_price_vnd: float = Field(..., description="Giá trị ước tính của tài sản (đơn vị: VND)")
+    """Schema cho kết quả trả về của API"""
+    estimated_price_vnd: float = Field(..., example=6150450123, description="Giá trị ước tính cuối cùng (VNĐ)")
+    analysis: PredictionAnalysis = Field(..., description="Phân tích chi tiết các yếu tố ảnh hưởng đến giá")

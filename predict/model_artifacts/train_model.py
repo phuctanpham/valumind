@@ -5,7 +5,7 @@ from sklearn.model_selection import train_test_split
 import lightgbm as lgb
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import OrdinalEncoder
+# <<< THAY ĐỔI: Không cần OrdinalEncoder nữa
 from sklearn.compose import ColumnTransformer
 from sklearn.metrics import mean_absolute_error, r2_score
 import joblib
@@ -65,24 +65,46 @@ def train_and_save_model():
         categorical_features = ['category', 'region', 'area']
         X = df[numerical_features + categorical_features].copy()
 
+        # >>> THAY ĐỔI LỚN BẮT ĐẦU TỪ ĐÂY <<<
+        # Chuyển đổi các cột categorical sang kiểu 'category' của pandas
+        # Đây là bước quan trọng để LightGBM nhận biết và xử lý chúng một cách tối ưu.
+        for col in categorical_features:
+            X[col] = X[col].astype('category')
+        logging.info("✅ Đã chuyển đổi các cột categorical sang dtype 'category' của Pandas.")
+
+        # Pipeline cho biến số chỉ cần điền giá trị thiếu
         numerical_transformer = Pipeline(steps=[('imputer', SimpleImputer(strategy='median'))])
+
+        # Pipeline cho biến phân loại BÂY GIỜ chỉ cần điền giá trị thiếu.
+        # Chúng ta không cần encoder nữa vì LightGBM sẽ xử lý trực tiếp.
         categorical_transformer = Pipeline(steps=[
-            ('imputer', SimpleImputer(strategy='most_frequent')),
-            ('encoder', OrdinalEncoder(handle_unknown='use_encoded_value', unknown_value=-1))
+            ('imputer', SimpleImputer(strategy='most_frequent'))
         ])
+
+        # Preprocessor vẫn giữ nguyên cấu trúc, nhưng tác vụ bên trong đã thay đổi
         preprocessor = ColumnTransformer(transformers=[
             ('num', numerical_transformer, numerical_features),
             ('cat', categorical_transformer, categorical_features)
         ])
-        logging.info("✅ Pipeline tiền xử lý đã được định nghĩa.")
+        logging.info("✅ Pipeline tiền xử lý đã được định nghĩa (sử dụng native categorical handling).")
+        # >>> KẾT THÚC THAY ĐỔI LỚN <<<
 
         # ==============================================================================
         # BƯỚC 3 & 4: CHIA DỮ LIỆU VÀ HUẤN LUYỆN MODEL
         # ==============================================================================
         logging.info("\n--- BƯỚC 3 & 4: CHIA DỮ LIỆU VÀ HUẤN LUYỆN MODEL ---")
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-        X_train_processed = preprocessor.fit_transform(X_train)
+        
+        # Fit preprocessor trên tập train
+        # Lưu ý: fit_transform sẽ trả về numpy array, làm mất tên cột.
+        # Nhưng vì X_train (pandas df) vẫn còn đó, chúng ta có thể dùng nó để chỉ cho LightGBM
+        # biết đâu là cột categorical.
+        preprocessor.fit(X_train) 
+        
+        # Transform cả train và test set
+        X_train_processed = preprocessor.transform(X_train)
         X_test_processed = preprocessor.transform(X_test)
+
 
         params = {'objective': 'regression_l1', 'metric': 'mae', 'n_estimators': 2000, 'learning_rate': 0.01,
                   'feature_fraction': 0.8, 'bagging_fraction': 0.8, 'bagging_freq': 1, 'lambda_l1': 0.1,
@@ -90,15 +112,30 @@ def train_and_save_model():
         
         logging.info("Bắt đầu huấn luyện LightGBM...")
         lgbm_model = lgb.LGBMRegressor(**params)
-        lgbm_model.fit(X_train_processed, y_train, eval_set=[(X_test_processed, y_test)],
-                       eval_metric='mae', callbacks=[lgb.early_stopping(100, verbose=True)])
+
+        # >>> THAY ĐỔI QUAN TRỌNG KHI HUẤN LUYỆN <<<
+        # Chúng ta cần chỉ cho LightGBM biết những cột nào là categorical
+        # bằng cách truyền tên cột vào tham số `categorical_feature`.
+        lgbm_model.fit(X_train, y_train, # Truyền trực tiếp X_train (DataFrame) vào đây
+                       eval_set=[(X_test, y_test)], # và X_test
+                       eval_metric='mae', 
+                       callbacks=[lgb.early_stopping(100, verbose=True)],
+                       categorical_feature=categorical_features # Đây là dòng quan trọng nhất!
+                      )
+        
+        # SAU KHI HUẤN LUYỆN XONG, FIT PREPROCESSOR LẦN NỮA VÀO TOÀN BỘ DỮ LIỆU X
+        # ĐỂ ĐẢM BẢO PREPROCESSOR ĐƯỢC LƯU LẠI LÀ PHIÊN BẢN ĐẦY ĐỦ NHẤT
+        preprocessor.fit(X)
+
         logging.info("✅ Huấn luyện hoàn tất!")
 
         # ==============================================================================
         # BƯỚC 5: ĐÁNH GIÁ VÀ LƯU KẾT QUẢ
         # ==============================================================================
         logging.info("\n--- BƯỚC 5: ĐÁNH GIÁ VÀ LƯU KẾT QUẢ ---")
-        y_pred = lgbm_model.predict(X_test_processed)
+        
+        # Dự đoán trên tập test đã được xử lý
+        y_pred = lgbm_model.predict(X_test) # Truyền trực tiếp X_test, model tự xử lý
         mae = mean_absolute_error(y_test, y_pred)
         r2 = r2_score(y_test, y_pred)
         metrics = {"mean_absolute_error": mae, "r2_score": r2}
@@ -110,7 +147,7 @@ def train_and_save_model():
         lgbm_model.booster_.save_model(MODEL_PATH)
         logging.info(f"✅ Model đã được lưu tại: {MODEL_PATH}")
 
-        metadata = {"model_version": "1.1.0", "training_data_shape": str(X_train.shape), "performance_metrics": metrics}
+        metadata = {"model_version": "1.2.0", "training_data_shape": str(X_train.shape), "performance_metrics": metrics}
         with open(METADATA_PATH, 'w', encoding='utf-8') as f:
             json.dump(metadata, f, ensure_ascii=False, indent=4)
         logging.info(f"✅ Metadata đã được lưu tại: {METADATA_PATH}")

@@ -5,3 +5,7 @@ joblib
 lightgbm
 python-dotenv
 tabulate
+
+shap
+matplotlib
+geopy
