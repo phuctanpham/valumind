@@ -38,12 +38,6 @@ export default function MiddleColumn({
 
   useEffect(() => {
     if (isEditing) {
-      const confirmSwitch = () => {
-        return window.confirm(
-          'You have unsaved changes. Are you sure you want to discard them?'
-        );
-      };
-
       const handleBeforeUnload = (event: BeforeUnloadEvent) => {
         event.preventDefault();
         event.returnValue = '';
