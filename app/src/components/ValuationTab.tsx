@@ -24,6 +24,11 @@ interface NearbyValuation {
   lng: number;
 }
 
+interface ValuationHistory {
+    date: string;
+    value: number;
+}
+
 interface MockItem {
   id: string;
   valuation: ValuationData;
@@ -31,6 +36,7 @@ interface MockItem {
   lat: number;
   lng: number;
   nearbyValuations: NearbyValuation[];
+  valuationHistory: ValuationHistory[] | null;
 }
 
 interface ValuationTabProps {
@@ -70,7 +76,7 @@ export default function ValuationTab({ apiValid }: ValuationTabProps) {
   return (
     <div className="valuation-tab">
       <InfoCard valuation={selectedItem.valuation} />
-      <ChartCard baseValue={selectedItem.valuation.totalValue} />
+      <ChartCard valuationHistory={selectedItem.valuationHistory} />
       <GeographyCard
         lat={selectedItem.lat}
         lng={selectedItem.lng}

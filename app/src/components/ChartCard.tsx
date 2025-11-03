@@ -3,37 +3,28 @@ import { useState, useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import './ChartCard.css';
 
-// Generate mock historical data
-const generateHistoricalData = (baseValue: number, months: number) => {
-  const data = [];
-  let currentValue = baseValue;
-  for (let i = 0; i < months; i++) {
-    const date = new Date();
-    date.setMonth(date.getMonth() - i);
-    const fluctuation = (Math.random() - 0.5) * 0.05; // +/- 5% fluctuation
-    currentValue *= (1 + fluctuation);
-    data.push({ date: date.toISOString().slice(0, 7), value: Math.round(currentValue) });
-  }
-  return data.reverse();
-};
-
-interface ChartCardProps {
-  baseValue: number;
+interface ValuationHistory {
+    date: string;
+    value: number;
 }
 
-export default function ChartCard({ baseValue }: ChartCardProps) {
+interface ChartCardProps {
+  valuationHistory: ValuationHistory[] | null;
+}
+
+export default function ChartCard({ valuationHistory }: ChartCardProps) {
   const [viewMode, setViewMode] = useState('month'); // 'month' or 'year'
   const [filter, setFilter] = useState(12); // Default to last 12 months
 
-  const historicalData = useMemo(() => generateHistoricalData(baseValue, 36), [baseValue]);
-
   const filteredData = useMemo(() => {
+    if (!valuationHistory) return [];
+
     if (viewMode === 'month') {
-      return historicalData.slice(-filter);
+        return valuationHistory.slice(-filter).map(h => ({ date: new Date(h.date).toISOString().slice(0, 7), value: h.value}));
     } else {
       // Aggregate by year
       const yearlyData: { [key: string]: number[] } = {};
-      historicalData.forEach(d => {
+      valuationHistory.forEach(d => {
         const year = new Date(d.date).getFullYear().toString();
         if (!yearlyData[year]) {
           yearlyData[year] = [];
@@ -46,7 +37,7 @@ export default function ChartCard({ baseValue }: ChartCardProps) {
       }));
       return aggregatedData.slice(-filter);
     }
-  }, [historicalData, viewMode, filter]);
+  }, [valuationHistory, viewMode, filter]);
 
   const handleFilterChange = (newFilter: number) => {
     setFilter(newFilter);
@@ -60,6 +51,15 @@ export default function ChartCard({ baseValue }: ChartCardProps) {
       setFilter(3);
     }
   };
+
+  if (!valuationHistory) {
+    return (
+        <div class="valuation-chart-card">
+            <h2>Valuation Over Time</h2>
+            <p>No valuation history available for this property.</p>
+        </div>
+    );
+  }
 
   const monthFilters = [1, 3, 6, 12, 36];
   const yearFilters = [1, 3];

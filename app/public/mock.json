@@ -19,6 +19,13 @@
         "period": "month"
       }
     },
+    "valuationHistory": [
+      { "date": "2023-01-01", "value": 32000000000 },
+      { "date": "2023-04-01", "value": 33500000000 },
+      { "date": "2023-07-01", "value": 34000000000 },
+      { "date": "2023-10-01", "value": 34500000000 },
+      { "date": "2024-01-01", "value": 35000000000 }
+    ],
     "nearbyValuations": [
       { "address": "105 Đ. Nguyễn Huệ", "value": 36000000000, "lat": 10.7755, "lng": 106.7033 },
       { "address": "95 Đ. Nguyễn Huệ", "value": 34500000000, "lat": 10.7749, "lng": 106.7029 },
@@ -29,47 +36,10 @@
         "sender": "bot",
         "message": "Chào mừng. Quá trình thẩm định giá ban đầu cho tài sản của bạn đã hoàn tất. Để tiếp tục với hồ sơ vay vốn, vui lòng tải lên các tài liệu cần thiết.",
         "timestamp": "2024-07-28T10:00:00Z"
-      },
-      {
-        "sender": "user",
-        "message": "Tuyệt vời! Cần những tài liệu gì?",
-        "timestamp": "2024-07-28T10:05:00Z"
-      },
-      {
-        "sender": "bot",
-        "message": "Chúng tôi cần Giấy chứng nhận quyền sử dụng đất, Bản vẽ mặt bằng đã được chứng thực và Tờ khai thuế tài sản gần nhất của bạn.",
-        "timestamp": "2024-07-28T10:06:00Z"
-      },
-      {
-        "sender": "user",
-        "message": "Đã hiểu. Tôi đang tải lên Giấy chứng nhận và Bản vẽ mặt bằng.",
-        "timestamp": "2024-07-29T14:30:00Z"
-      },
-      {
-        "sender": "bot",
-        "message": "Đã nhận: Certificate_of_Title.pdf và Floor_Plan.pdf. Cả hai đều hợp lệ. Chỉ cần Tờ khai thuế tài sản để hoàn tất hồ sơ của bạn.",
-        "timestamp": "2024-07-29T14:32:00Z"
-      },
-      {
-        "sender": "user",
-        "message": "Vừa tải lên tờ khai thuế.",
-        "timestamp": "2024-07-30T11:00:00Z"
-      },
-      {
-        "sender": "bot",
-        "message": "Tuyệt vời! Tất cả tài liệu đã được xác minh. Hồ sơ của bạn hiện đã hoàn tất và được chuyển đến nhóm cho vay của chúng tôi để xem xét. Bạn sẽ được thông báo về quyết định của họ trong vòng 3-5 ngày làm việc. Cảm ơn sự hợp tác của bạn!",
-        "timestamp": "2024-07-30T11:02:00Z"
       }
     ],
     "activityLogs": [
-      { "activity": "Hồ sơ vay vốn đã được nộp để xem xét lần cuối.", "timestamp": "2024-07-30T11:02:00Z" },
-      { "activity": "Người dùng đã tải lên 'Property_Tax_Assessment_2024.pdf'.", "timestamp": "2024-07-30T10:59:00Z" },
-      { "activity": "Địa chỉ được cập nhật từ '123 Main Street' thành '123 Main St'.", "timestamp": "2024-07-29T18:00:00Z" },
-      { "activity": "Tên chủ sở hữu được sửa.", "timestamp": "2024-07-29T17:45:00Z" },
-      { "activity": "Người dùng đã tải lên 'Floor_Plan_v2.pdf', thay thế 'Floor_Plan_v1.pdf'.", "timestamp": "2024-07-29T14:29:00Z" },
-      { "activity": "Người dùng đã tải lên 'Certificate_of_Title.pdf'.", "timestamp": "2024-07-29T14:28:00Z" },
-      { "activity": "Thẩm định giá hoàn tất bởi mô hình AI 'ValuProphet v2.1'.", "timestamp": "2024-07-28T09:00:00Z" },
-      { "activity": "Mục 'C-12345' đã được tạo.", "timestamp": "2024-07-28T08:25:00Z" }
+      { "activity": "Hồ sơ vay vốn đã được nộp để xem xét lần cuối.", "timestamp": "2024-07-30T11:02:00Z" }
     ]
   },
   {
@@ -91,6 +61,13 @@
         "period": "month"
       }
     },
+    "valuationHistory": [
+      { "date": "2023-01-01", "value": 11000000000 },
+      { "date": "2023-04-01", "value": 11500000000 },
+      { "date": "2023-07-01", "value": 11800000000 },
+      { "date": "2023-10-01", "value": 12100000000 },
+      { "date": "2024-01-01", "value": 12000000000 }
+    ],
     "nearbyValuations": [
       { "address": "283 Đ. Cách Mạng Tháng 8", "value": 11800000000, "lat": 10.7796, "lng": 106.6747 },
       { "address": "287 Đ. Cách Mạng Tháng 8", "value": 12200000000, "lat": 10.7800, "lng": 106.6751 },
@@ -101,52 +78,10 @@
         "sender": "bot",
         "message": "Chào mừng. Tài sản của bạn đang chờ xác minh. Để tiếp tục, vui lòng tải lên Giấy chứng nhận quyền sử dụng đất và tờ khai thuế tài sản gần đây.",
         "timestamp": "2024-07-25T09:15:00Z"
-      },
-      {
-        "sender": "user",
-        "message": "Tôi đã tải lên giấy tờ nhà đất.",
-        "timestamp": "2024-07-26T11:20:00Z"
-      },
-      {
-        "sender": "bot",
-        "message": "Cảm ơn. Tài liệu bạn tải lên có vẻ là bản quét hóa đơn tiện ích, không phải Giấy chứng nhận quyền sử dụng đất. Vui lòng tải lên tài liệu chính xác.",
-        "timestamp": "2024-07-26T11:22:00Z"
-      },
-      {
-        "sender": "user",
-        "message": "Xin lỗi, tôi nhầm. Đây là cái đúng.",
-        "timestamp": "2024-07-27T16:45:00Z"
-      },
-      {
-        "sender": "bot",
-        "message": "Đã nhận được Giấy chứng nhận quyền sử dụng đất. Tuy nhiên, tên chủ sở hữu trên giấy chứng nhận không khớp với tên trong hồ sơ của bạn. Vui lòng làm rõ hoặc cập nhật hồ sơ của bạn.",
-        "timestamp": "2024-07-27T16:48:00Z"
-      },
-       {
-        "sender": "user",
-        "message": "Đó là lỗi đánh máy trong hồ sơ của tôi. Làm cách nào để sửa?",
-        "timestamp": "2024-07-28T10:30:00Z"
-      },
-      {
-        "sender": "bot",
-        "message": "Bạn có thể cập nhật tên của mình trong mục 'Hồ sơ'. Sau đó, tôi sẽ xác minh lại tài liệu. Hồ sơ của bạn hiện đang bị tạm dừng.",
-        "timestamp": "2024-07-28T10:32:00Z"
-      },
-      {
-        "sender": "bot",
-        "message": "Hồ sơ vay vốn của bạn đã bị từ chối do không đủ tài liệu. Vui lòng nộp lại hồ sơ khi bạn có tất cả các giấy tờ cần thiết.",
-        "timestamp": "2024-08-01T14:00:00Z"
       }
     ],
     "activityLogs": [
-      { "activity": "Hồ sơ vay vốn bị từ chối. Lý do: Không đủ giấy tờ.", "timestamp": "2024-08-01T14:00:00Z" },
-      { "activity": "Tình trạng hồ sơ đã thay đổi thành 'Tạm dừng'.", "timestamp": "2024-07-27T16:48:00Z" },
-      { "activity": "Người dùng đã tải lên 'Title_Deed_Final.pdf'.", "timestamp": "2024-07-27T16:44:00Z" },
-      { "activity": "Hệ thống đã đánh dấu tài liệu 'Utility_Bill_July.pdf' là loại không chính xác.", "timestamp": "2024-07-26T11:22:00Z" },
-      { "activity": "Người dùng đã tải lên 'Utility_Bill_July.pdf'.", "timestamp": "2024-07-26T11:19:00Z" },
-      { "activity": "Bắt đầu nộp lại hồ sơ.", "timestamp": "2024-07-25T09:14:00Z" },
-      { "activity": "Hồ sơ trước đó bị từ chối. Lý do: Thiếu tài liệu.", "timestamp": "2024-07-24T18:00:00Z" },
-      { "activity": "Mục 'C-67890' đã được tạo.", "timestamp": "2024-07-22T08:40:00Z" }
+      { "activity": "Hồ sơ vay vốn bị từ chối. Lý do: Không đủ giấy tờ.", "timestamp": "2024-08-01T14:00:00Z" }
     ]
   },
   {
@@ -168,6 +103,7 @@
         "period": "month"
       }
     },
+    "valuationHistory": null,
     "nearbyValuations": [
       { "address": "10 Đ. Thái Văn Lung", "value": 29000000000, "lat": 10.7793, "lng": 106.7044 },
       { "address": "6 Đ. Thái Văn Lung", "value": 27500000000, "lat": 10.7789, "lng": 106.7040 },
