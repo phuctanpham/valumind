@@ -6,13 +6,7 @@
   border-right: 1px solid rgba(255, 255, 255, 0.1);
   transition: all 0.3s ease;
   position: relative;
-  height: calc(100vh - 60px); 
-  overflow-y: auto;
-  direction: rtl; /* Move scrollbar to the left */
-}
-
-.left-column > * {
-  direction: ltr; /* Reset text direction for content */
+  height: calc(100vh - 60px);
 }
 
 .left-column.expanded {
@@ -75,6 +69,7 @@
 .items-list {
   flex: 1;
   padding: 0.5rem;
+  overflow-y: auto; /* Enable vertical scrolling */
 }
 
 .item-cell {

@@ -4,12 +4,6 @@
   flex-direction: column;
   background-color: rgba(255, 255, 255, 0.01);
   height: calc(100vh - 60px);
-  overflow-y: auto;
-  direction: rtl; /* Move scrollbar to the left */
-}
-
-.middle-column > * {
-  direction: ltr; /* Reset text direction for content */
 }
 
 .column-header {
@@ -60,12 +54,14 @@
 
 .tab-content {
   flex: 1;
+  overflow-y: auto; /* Enable vertical scrolling */
 }
 
 .empty-state-container {
   display: flex;
   align-items: center;
   justify-content: center;
+  height: 100%;
 }
 
 .empty-state {
