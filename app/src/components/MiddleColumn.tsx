@@ -87,23 +87,19 @@ export default function MiddleColumn({
       <div className="column-header">
         <div className="tabs">
             <button
-            className={`tab-button ${activeTab === 'detail' ? 'active' : ''}`}
-            onClick={() => handleTabChange('detail')}
+              className={`tab-button ${activeTab === 'detail' ? 'active' : ''}`}
+              onClick={() => handleTabChange('detail')}
             >
-            Detail
+              {flags.DetailTab_editSwitch && <span className="gear-icon" onClick={() => setIsEditing(!isEditing)}></span>}
+              Detail
             </button>
             <button
-            className={`tab-button ${activeTab === 'valuation' ? 'active' : ''}`}
-            onClick={() => handleTabChange('valuation')}
+              className={`tab-button ${activeTab === 'valuation' ? 'active' : ''}`}
+              onClick={() => handleTabChange('valuation')}
             >
-            Valuation
+              Valuation
             </button>
         </div>
-        {activeTab === 'detail' && flags.DetailTab_editSwitch && (
-            <div className="edit-gear-container">
-                <span className="gear-icon" onClick={() => setIsEditing(!isEditing)}></span>
-            </div>
-        )}
       </div>
       <div className="tab-content">
         {activeTab === 'detail' && (
@@ -114,7 +110,7 @@ export default function MiddleColumn({
             onSave={() => setIsEditing(false)} 
             onCancel={() => setIsEditing(false)} />
         )}
-        {activeTab === 'valuation' && <ValuationTab apiValid={apiValid} />}
+        {activeTab === 'valuation' && <div className="valuation-tab-content"><ValuationTab apiValid={apiValid} /></div>}
       </div>
     </div>
   );
