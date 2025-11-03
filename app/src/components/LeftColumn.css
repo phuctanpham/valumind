@@ -1,10 +1,4 @@
-.left-column,
-.middle-column,
-.right-column {
-  overflow-y: auto; /* Ensure scrollbars appear on the column itself */
-  height: calc(100vh - 60px); /* Adjust height to account for top bar */
-}
-
+/* LeftColumn.css */
 .left-column {
   display: flex;
   flex-direction: column;
@@ -12,6 +6,13 @@
   border-right: 1px solid rgba(255, 255, 255, 0.1);
   transition: all 0.3s ease;
   position: relative;
+  height: calc(100vh - 60px); 
+  overflow-y: auto;
+  direction: rtl; /* Move scrollbar to the left */
+}
+
+.left-column > * {
+  direction: ltr; /* Reset text direction for content */
 }
 
 .left-column.expanded {
@@ -33,7 +34,7 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   background-color: rgba(255, 255, 255, 0.02);
   flex-shrink: 0;
-  position: sticky; /* Make header sticky */
+  position: sticky;
   top: 0;
   z-index: 1;
 }
@@ -47,8 +48,8 @@
 .tab {
   display: flex;
   align-items: center;
-  justify-content: center; /* Center content */
-  flex: 1; /* Make tabs fill width */
+  justify-content: center;
+  flex: 1;
   height: 100%;
   padding: 0 1rem;
   border: none;
