@@ -1,6 +1,6 @@
 
 import { useState, useRef, useEffect } from 'react';
-import type { SyncStatus, CellItem } from '../App';
+import type { CellItem } from '../App';
 import './LeftColumn.css';
 
 interface LeftColumnProps {

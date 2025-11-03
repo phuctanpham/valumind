@@ -1,9 +1,10 @@
 import { useState } from 'react';
+import type { CellItem } from '../App';
 import './FloatingBubble.css';
 
 interface FloatingBubbleProps {
   authMode: 'guest' | 'authenticated';
-  onAdd: (item: { avatar: string; address: string; certificateNumber: string; owner: string }) => void;
+  onAdd: (item: Omit<CellItem, 'id' | 'syncStatus'>) => void;
   onLoginRequest: () => void;
   itemsLength: number;
 }
@@ -44,7 +45,23 @@ export default function FloatingBubble({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onAdd(formData);
+    const newItem: Omit<CellItem, 'id' | 'syncStatus'> = {
+      ...formData,
+      lat: 0, // Placeholder, will be updated on sync
+      lng: 0, // Placeholder, will be updated on sync
+      valuation: {
+        aiModel: 'N/A',
+        confidenceScore: 0,
+        totalValue: 0,
+        unitValue: 0,
+        valueChange: { percent: 0, period: 'N/A' },
+      },
+      valuationHistory: [],
+      nearbyValuations: [],
+      chatHistory: [],
+      activityLogs: [],
+    };
+    onAdd(newItem);
     setFormData({ avatar: '', address: '', certificateNumber: '', owner: '' });
     setShowModal(false);
   };
