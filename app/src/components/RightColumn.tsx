@@ -1,29 +1,9 @@
 
 import { useState } from 'react';
+import type { CellItem } from '../App';
 import BotTab from './BotTab';
 import LogTab from './LogTab';
 import './RightColumn.css';
-
-interface ChatMessage {
-  sender: 'user' | 'bot';
-  message: string;
-  timestamp: string;
-}
-
-interface ActivityLog {
-  activity: string;
-  timestamp: string;
-}
-
-interface CellItem {
-  id: string;
-  avatar: string;
-  address: string;
-  certificateNumber: string;
-  owner: string;
-  chatHistory?: ChatMessage[];
-  activityLogs?: ActivityLog[];
-}
 
 interface RightColumnProps {
   selectedItem: CellItem | undefined;

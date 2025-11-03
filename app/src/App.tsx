@@ -17,16 +17,58 @@ interface EndpointsConfig {
 
 export type SyncStatus = 'synced' | 'pending' | 'failed';
 
-interface CellItem {
+interface Valuation {
+  aiModel: string;
+  confidenceScore: number;
+  totalValue: number;
+  unitValue: number;
+  valueChange: {
+    percent: number;
+    period: string;
+  };
+}
+
+interface ValuationHistory {
+  date: string;
+  value: number;
+}
+
+interface NearbyValuation {
+  address: string;
+  value: number;
+  lat: number;
+  lng: number;
+}
+
+interface ChatMessage {
+  sender: 'bot' | 'user';
+  message: string;
+  timestamp: string;
+}
+
+interface ActivityLog {
+  activity: string;
+  timestamp: string;
+}
+
+export interface CellItem {
   id: string;
   avatar: string;
   address: string;
+  lat: number;
+  lng: number;
   certificateNumber: string;
   owner: string;
   syncStatus: SyncStatus;
+  valuation: Valuation;
+  valuationHistory: ValuationHistory[] | null;
+  nearbyValuations: NearbyValuation[];
+  chatHistory: ChatMessage[];
+  activityLogs: ActivityLog[];
   customFields?: { [key: string]: string };
 }
 
+type Data = { [key: string]: CellItem };
 type AppState = 'loading' | 'login' | 'main';
 type AuthMode = 'guest' | 'authenticated';
 
@@ -36,7 +78,7 @@ function App() {
   const [config, setConfig] = useState<EndpointsConfig | null>(null);
   const [loadingProgress, setLoadingProgress] = useState(0);
   
-  const [items, setItems] = useState<CellItem[]>([]);
+  const [items, setItems] = useState<Data>({});
   
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -48,7 +90,7 @@ function App() {
 
   // Persist items to local storage
   useEffect(() => {
-    if (items.length > 0) {
+    if (Object.keys(items).length > 0) {
       localStorage.setItem('items', JSON.stringify(items));
     }
   }, [items]);
@@ -73,12 +115,12 @@ function App() {
         if (savedItems) {
           const parsedItems = JSON.parse(savedItems);
           setItems(parsedItems);
-          setSelectedItemId(parsedItems[0]?.id || null);
+          setSelectedItemId(Object.keys(parsedItems)[0] || null);
         } else if (authMode === 'guest') {
           const response = await fetch('/mock.json');
           const data = await response.json();
           setItems(data);
-          setSelectedItemId(data[0]?.id || null);
+          setSelectedItemId(Object.keys(data)[0] || null);
         }
 
         setLoadingProgress(100);
@@ -136,19 +178,23 @@ function App() {
   };
 
   const handleAddItem = (newItem: Omit<CellItem, 'id' | 'syncStatus'>) => {
-    if (authMode === 'guest' && items.length >= 2) {
+    if (authMode === 'guest' && Object.keys(items).length >= 3) {
       return;
     }
+    const id = `item-${Date.now()}`;
     const item: CellItem = {
-      id: `item-${Date.now()}`,
+      id,
       ...newItem,
       syncStatus: 'pending',
     };
-    setItems(prev => [...prev, item]);
+    setItems(prev => ({ ...prev, [id]: item }));
   };
 
   const handleUpdateItem = (id: string, field: string, value: any) => {
-    setItems(prev => prev.map(item => item.id === id ? { ...item, [field]: value } : item));
+    setItems(prev => ({
+      ...prev,
+      [id]: { ...prev[id], [field]: value },
+    }));
   };
 
   const handleSync = (itemId: string) => {
@@ -157,10 +203,17 @@ function App() {
       return;
     }
     
-    setItems(prev => prev.map(item => item.id === itemId ? { ...item, syncStatus: 'pending' } : item));
+    setItems(prev => ({
+      ...prev,
+      [itemId]: { ...prev[itemId], syncStatus: 'pending' },
+    }));
+    
     setTimeout(() => {
       const isSuccess = Math.random() > 0.2;
-      setItems(prev => prev.map(item => item.id === itemId ? { ...item, syncStatus: isSuccess ? 'synced' : 'failed' } : item));
+      setItems(prev => ({
+        ...prev,
+        [itemId]: { ...prev[itemId], syncStatus: isSuccess ? 'synced' : 'failed' },
+      }));
     }, 2000);
   };
 
@@ -168,7 +221,8 @@ function App() {
     setSelectedItemId(id);
   };
   
-  const selectedItem = items.find(item => item.id === selectedItemId);
+  const selectedItem = selectedItemId ? items[selectedItemId] : undefined;
+  const itemsArray = Object.values(items);
 
   if (appState === 'loading') {
     return (
@@ -185,19 +239,19 @@ function App() {
       <div className={`main-content ${isMobile ? 'mobile' : 'desktop'}`}>
         {isMobile ? (
           <>
-            {mobileColumn === 'left' && <LeftColumn items={items} selectedItemId={selectedItemId} onSelectItem={handleSelectItem} onSync={handleSync} onBulkEdit={setBulkEditIds} bulkSelectedIds={bulkEditIds} />}
+            {mobileColumn === 'left' && <LeftColumn items={itemsArray} selectedItemId={selectedItemId} onSelectItem={handleSelectItem} onSync={handleSync} onBulkEdit={setBulkEditIds} bulkSelectedIds={bulkEditIds} />}
             {mobileColumn === 'middle' && <MiddleColumn selectedItem={selectedItem} onUpdateItem={handleUpdateItem} apiValid={config?.API_ENDPOINT_CONFIG ?? false} onNavigate={() => setMobileColumn('left')} />}
             {mobileColumn === 'right' && <RightColumn selectedItem={selectedItem} onNavigate={() => setMobileColumn('middle')} />}
           </>
         ) : (
           <>
-            <LeftColumn items={items} selectedItemId={selectedItemId} onSelectItem={handleSelectItem} onSync={handleSync} expanded={leftExpanded} onToggleExpand={() => setLeftExpanded(!leftExpanded)} onBulkEdit={setBulkEditIds} bulkSelectedIds={bulkEditIds} />
+            <LeftColumn items={itemsArray} selectedItemId={selectedItemId} onSelectItem={handleSelectItem} onSync={handleSync} expanded={leftExpanded} onToggleExpand={() => setLeftExpanded(!leftExpanded)} onBulkEdit={setBulkEditIds} bulkSelectedIds={bulkEditIds} />
             <MiddleColumn selectedItem={selectedItem} onUpdateItem={handleUpdateItem} apiValid={config?.API_ENDPOINT_CONFIG ?? false} />
             <RightColumn selectedItem={selectedItem} expanded={rightExpanded} onToggleExpand={() => setRightExpanded(!rightExpanded)} />
           </>
         )}
       </div>
-      <FloatingBubble authMode={authMode} onAdd={handleAddItem} onLoginRequest={() => setAppState('login')} itemsLength={items.length} />
+      <FloatingBubble authMode={authMode} onAdd={handleAddItem} onLoginRequest={() => setAppState('login')} itemsLength={itemsArray.length} />
       
       {appState === 'login' && (
         <div className="notification-modal">

@@ -1,16 +1,11 @@
 
 import { useState } from 'react';
+import type { CellItem } from '../App';
 import './BotTab.css';
-
-interface ChatMessage {
-  sender: 'user' | 'bot';
-  message: string;
-  timestamp: string;
-}
 
 interface BotTabProps {
   certificateNumber: string;
-  chatHistory: ChatMessage[];
+  chatHistory: CellItem['chatHistory'];
 }
 
 export default function BotTab({ certificateNumber, chatHistory }: BotTabProps) {

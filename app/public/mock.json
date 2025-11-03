@@ -1,6 +1,5 @@
-
-[
-  {
+{
+  "item-1": {
     "id": "item-1",
     "avatar": "https://i.pravatar.cc/150?img=1",
     "address": "101 Đ. Nguyễn Huệ, Bến Nghé, Quận 1, Thành phố Hồ Chí Minh",
@@ -21,9 +20,16 @@
     },
     "valuationHistory": [
       { "date": "2023-01-01", "value": 32000000000 },
+      { "date": "2023-02-01", "value": 32200000000 },
+      { "date": "2023-03-01", "value": 32500000000 },
       { "date": "2023-04-01", "value": 33500000000 },
+      { "date": "2023-05-01", "value": 33600000000 },
+      { "date": "2023-06-01", "value": 33800000000 },
       { "date": "2023-07-01", "value": 34000000000 },
+      { "date": "2023-08-01", "value": 34100000000 },
+      { "date": "2023-09-01", "value": 34300000000 },
       { "date": "2023-10-01", "value": 34500000000 },
+      { "date": "2023-11-01", "value": 34800000000 },
       { "date": "2024-01-01", "value": 35000000000 }
     ],
     "nearbyValuations": [
@@ -36,13 +42,19 @@
         "sender": "bot",
         "message": "Chào mừng. Quá trình thẩm định giá ban đầu cho tài sản của bạn đã hoàn tất. Để tiếp tục với hồ sơ vay vốn, vui lòng tải lên các tài liệu cần thiết.",
         "timestamp": "2024-07-28T10:00:00Z"
+      },
+      {
+        "sender": "user",
+        "message": "Tôi đã tải lên các tài liệu được yêu cầu. Vui lòng xem xét.",
+        "timestamp": "2024-07-29T09:00:00Z"
       }
     ],
     "activityLogs": [
-      { "activity": "Hồ sơ vay vốn đã được nộp để xem xét lần cuối.", "timestamp": "2024-07-30T11:02:00Z" }
+      { "activity": "Hồ sơ vay vốn đã được nộp để xem xét lần cuối.", "timestamp": "2024-07-30T11:02:00Z" },
+      { "activity": "Yêu cầu tài liệu bổ sung: Bằng chứng về thu nhập.", "timestamp": "2024-07-31T15:30:00Z" }
     ]
   },
-  {
+  "item-2": {
     "id": "item-2",
     "avatar": "https://i.pravatar.cc/150?img=2",
     "address": "285 Đ. Cách Mạng Tháng 8, Phường 12, Quận 10, Thành phố Hồ Chí Minh",
@@ -78,13 +90,24 @@
         "sender": "bot",
         "message": "Chào mừng. Tài sản của bạn đang chờ xác minh. Để tiếp tục, vui lòng tải lên Giấy chứng nhận quyền sử dụng đất và tờ khai thuế tài sản gần đây.",
         "timestamp": "2024-07-25T09:15:00Z"
+      },
+      {
+        "sender": "user",
+        "message": "Tôi không chắc chắn về tài liệu bạn cần. Bạn có thể làm rõ?",
+        "timestamp": "2024-07-26T14:20:00Z"
+      },
+      {
+        "sender": "bot",
+        "message": "Vui lòng tải lên bản sao Giấy chứng nhận quyền sử dụng đất và Tờ khai thuế tài sản cho năm tính thuế gần nhất.",
+        "timestamp": "2024-07-26T14:25:00Z"
       }
     ],
     "activityLogs": [
-      { "activity": "Hồ sơ vay vốn bị từ chối. Lý do: Không đủ giấy tờ.", "timestamp": "2024-08-01T14:00:00Z" }
+      { "activity": "Hồ sơ vay vốn bị từ chối. Lý do: Không đủ giấy tờ.", "timestamp": "2024-08-01T14:00:00Z" },
+      { "activity": "Người dùng đã xem lại các yêu cầu về tài liệu.", "timestamp": "2024-08-02T10:00:00Z" }
     ]
   },
-  {
+  "item-3": {
     "id": "item-3",
     "avatar": "https://i.pravatar.cc/150?img=3",
     "address": "8A Đ. Thái Văn Lung, Bến Nghé, Quận 1, Thành phố Hồ Chí Minh",
@@ -120,4 +143,4 @@
       { "activity": "Hồ sơ vay vốn đã được nộp để xem xét lần cuối.", "timestamp": "2024-07-30T11:02:00Z" }
     ]
   }
-]
+}

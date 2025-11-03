@@ -1,14 +1,10 @@
 
+import type { CellItem } from '../App';
 import './LogTab.css';
-
-interface ActivityLog {
-  activity: string;
-  timestamp: string;
-}
 
 interface LogTabProps {
   certificateNumber: string;
-  activityLogs: ActivityLog[];
+  activityLogs: CellItem['activityLogs'];
 }
 
 export default function LogTab({ certificateNumber, activityLogs }: LogTabProps) {

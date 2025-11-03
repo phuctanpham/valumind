@@ -2,9 +2,9 @@
 import { useState, useEffect } from 'react';
 import DetailTab from './DetailTab';
 import ValuationTab from './ValuationTab';
+import type { CellItem } from '../App';
 import './MiddleColumn.css';
 
-// A modern, clean gear icon from the Lucide icon set
 const GearIcon = () => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -20,15 +20,6 @@ const GearIcon = () => (
       <circle cx="12" cy="12" r="3" />
     </svg>
 );
-
-interface CellItem {
-  id: string;
-  avatar: string;
-  address: string;
-  certificateNumber: string;
-  owner: string;
-  customFields?: { [key: string]: string };
-}
 
 interface MiddleColumnProps {
   selectedItem: CellItem | undefined;
@@ -127,7 +118,7 @@ export default function MiddleColumn({
             onSave={() => setIsEditing(false)}
             onCancel={() => setIsEditing(false)} />
         )}
-        {activeTab === 'valuation' && <div className="valuation-tab-content"><ValuationTab apiValid={apiValid} /></div>}
+        {activeTab === 'valuation' && <ValuationTab selectedItem={selectedItem} apiValid={apiValid} />}
       </div>
     </div>
   );

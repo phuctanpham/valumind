@@ -1,19 +1,9 @@
 
+import type { CellItem } from '../App';
 import './InfoCard.css';
 
-interface ValuationData {
-  aiModel: string;
-  confidenceScore: number;
-  totalValue: number;
-  unitValue: number;
-  valueChange: {
-    percent: number;
-    period: string;
-  };
-}
-
 interface InfoCardProps {
-  valuation: ValuationData;
+  valuation: CellItem['valuation'];
 }
 
 const formatCurrency = (value: number) => {

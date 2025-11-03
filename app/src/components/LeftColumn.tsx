@@ -1,16 +1,7 @@
 
 import { useState, useRef, useEffect } from 'react';
-import type { SyncStatus } from '../App';
+import type { SyncStatus, CellItem } from '../App';
 import './LeftColumn.css';
-
-interface CellItem {
-  id: string;
-  avatar: string;
-  address: string;
-  certificateNumber: string;
-  owner: string;
-  syncStatus: SyncStatus;
-}
 
 interface LeftColumnProps {
   items: CellItem[];

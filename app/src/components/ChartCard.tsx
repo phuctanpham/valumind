@@ -1,15 +1,11 @@
 
 import { useState, useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import type { CellItem } from '../App';
 import './ChartCard.css';
 
-interface ValuationHistory {
-    date: string;
-    value: number;
-}
-
 interface ChartCardProps {
-  valuationHistory: ValuationHistory[] | null;
+  valuationHistory: CellItem['valuationHistory'];
 }
 
 export default function ChartCard({ valuationHistory }: ChartCardProps) {

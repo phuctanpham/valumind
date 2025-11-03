@@ -19,6 +19,25 @@ body {
   overflow: hidden;
 }
 
+/* Custom Scrollbar */
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #2e2e2e;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 5px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #666;
+}
+
 /* Loading Screen */
 .loading-screen {
   display: flex;
@@ -129,6 +148,12 @@ body {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .main-content {

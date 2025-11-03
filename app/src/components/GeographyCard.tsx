@@ -1,23 +1,13 @@
 
 import { APIProvider, Map, AdvancedMarker } from '@vis.gl/react-google-maps';
+import type { CellItem } from '../App';
 import './GeographyCard.css';
-
-interface ValuationData {
-  totalValue: number;
-}
-
-interface NearbyValuation {
-  address: string;
-  value: number;
-  lat: number;
-  lng: number;
-}
 
 interface GeographyCardProps {
   lat: number;
   lng: number;
-  valuation: ValuationData;
-  nearbyValuations: NearbyValuation[];
+  valuation: CellItem['valuation'];
+  nearbyValuations: CellItem['nearbyValuations'];
 }
 
 const formatCurrency = (value: number) => {

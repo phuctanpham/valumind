@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import type { CellItem } from '../App';
 import './DetailTab.css';
 
 const availableFields = [
@@ -12,7 +13,7 @@ const availableFields = [
 ];
 
 interface DetailTabProps {
-  selectedItem: any;
+  selectedItem: CellItem;
   onUpdate: (field: string, value: any) => void;
   isEditing: boolean;
   onSave: () => void;
