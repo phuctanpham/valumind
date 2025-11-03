@@ -14,10 +14,12 @@ const availableFields = [
 interface DetailTabProps {
   selectedItem: any;
   onUpdate: (field: string, value: any) => void;
+  isEditing: boolean;
+  onSave: () => void;
+  onCancel: () => void;
 }
 
-export default function DetailTab({ selectedItem, onUpdate }: DetailTabProps) {
-  const [isEditing, setIsEditing] = useState(false);
+export default function DetailTab({ selectedItem, onUpdate, isEditing, onSave, onCancel }: DetailTabProps) {
   const [editedFields, setEditedFields] = useState<any>(null);
   const [selectedField, setSelectedField] = useState('');
 
@@ -72,7 +74,7 @@ export default function DetailTab({ selectedItem, onUpdate }: DetailTabProps) {
         onUpdate('customFields', editedFields.customFields);
     }
     
-    setIsEditing(false);
+    onSave();
   };
 
   const handleCancel = () => {
@@ -80,19 +82,11 @@ export default function DetailTab({ selectedItem, onUpdate }: DetailTabProps) {
         ...selectedItem,
         customFields: selectedItem.customFields || {},
       });
-    setIsEditing(false);
+    onCancel();
   };
 
   return (
     <div className="detail-tab">
-      <div className="edit-switch-container">
-        <label className="switch">
-          <input type="checkbox" checked={isEditing} onChange={() => setIsEditing(!isEditing)} />
-          <span className="slider round"></span>
-        </label>
-        <span>Edit Mode</span>
-      </div>
-
       <div className="form-field">
         <label>Certificate Number</label>
         <input

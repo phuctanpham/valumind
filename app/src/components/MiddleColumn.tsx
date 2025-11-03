@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import DetailTab from './DetailTab';
 import ValuationTab from './ValuationTab';
 import './MiddleColumn.css';
@@ -27,6 +27,46 @@ export default function MiddleColumn({
   apiValid,
 }: MiddleColumnProps) {
   const [activeTab, setActiveTab] = useState('detail');
+  const [isEditing, setIsEditing] = useState(false);
+  const [flags, setFlags] = useState<any>({});
+
+  useEffect(() => {
+    fetch('/flags.json')
+      .then((response) => response.json())
+      .then((data) => setFlags(data));
+  }, []);
+
+  useEffect(() => {
+    if (isEditing) {
+      const confirmSwitch = () => {
+        return window.confirm(
+          'You have unsaved changes. Are you sure you want to discard them?'
+        );
+      };
+
+      const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+        event.preventDefault();
+        event.returnValue = '';
+      };
+
+      window.addEventListener('beforeunload', handleBeforeUnload);
+
+      return () => {
+        window.removeEventListener('beforeunload', handleBeforeUnload);
+      };
+    }
+  }, [isEditing]);
+  
+  const handleTabChange = (tab: string) => {
+    if (isEditing) {
+      if (window.confirm('You have unsaved changes. Are you sure you want to discard them?')) {
+        setIsEditing(false);
+        setActiveTab(tab);
+      } 
+    } else {
+      setActiveTab(tab);
+    }
+  };
 
   if (!selectedItem) {
     return (
@@ -51,22 +91,38 @@ export default function MiddleColumn({
   return (
     <div className="middle-column">
       <div className="tab-navigation">
-        <button
-          className={`tab-button ${activeTab === 'detail' ? 'active' : ''}`}
-          onClick={() => setActiveTab('detail')}
-        >
-          Detail
-        </button>
-        <button
-          className={`tab-button ${activeTab === 'valuation' ? 'active' : ''}`}
-          onClick={() => setActiveTab('valuation')}
-        >
-          Valuation
-        </button>
+        <div className="tabs">
+            <button
+            className={`tab-button ${activeTab === 'detail' ? 'active' : ''}`}
+            onClick={() => handleTabChange('detail')}
+            >
+            Detail
+            </button>
+            <button
+            className={`tab-button ${activeTab === 'valuation' ? 'active' : ''}`}
+            onClick={() => handleTabChange('valuation')}
+            >
+            Valuation
+            </button>
+        </div>
+        {activeTab === 'detail' && flags.DetailTab_editSwitch && (
+            <div className="edit-switch-container">
+                <label className="switch">
+                <input type="checkbox" checked={isEditing} onChange={() => setIsEditing(!isEditing)} />
+                <span className="slider round"></span>
+                </label>
+                <span>Edit Mode</span>
+            </div>
+        )}
       </div>
       <div className="tab-content">
         {activeTab === 'detail' && (
-          <DetailTab selectedItem={selectedItem} onUpdate={handleUpdate} />
+          <DetailTab 
+            selectedItem={selectedItem} 
+            onUpdate={handleUpdate} 
+            isEditing={isEditing} 
+            onSave={() => setIsEditing(false)} 
+            onCancel={() => setIsEditing(false)} />
         )}
         {activeTab === 'valuation' && <ValuationTab apiValid={apiValid} />}
       </div>
