@@ -18,14 +18,23 @@ interface DetailTabProps {
 
 export default function DetailTab({ selectedItem, onUpdate }: DetailTabProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [editedFields, setEditedFields] = useState(selectedItem);
+  const [editedFields, setEditedFields] = useState<any>(null);
   const [selectedField, setSelectedField] = useState('');
 
   useEffect(() => {
-    setEditedFields(selectedItem);
+    if (selectedItem) {
+      setEditedFields({
+        ...selectedItem,
+        customFields: selectedItem.customFields || {},
+      });
+    } else {
+      setEditedFields(null);
+    }
   }, [selectedItem]);
 
-  if (!selectedItem) return null;
+  if (!editedFields) {
+    return null;
+  }
 
   const handleAddField = () => {
     if (selectedField && !editedFields.customFields.hasOwnProperty(selectedField)) {
@@ -67,7 +76,10 @@ export default function DetailTab({ selectedItem, onUpdate }: DetailTabProps) {
   };
 
   const handleCancel = () => {
-    setEditedFields(selectedItem);
+    setEditedFields({
+        ...selectedItem,
+        customFields: selectedItem.customFields || {},
+      });
     setIsEditing(false);
   };
 
