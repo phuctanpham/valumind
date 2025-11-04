@@ -1,78 +1,51 @@
 import os
-import logging
+import openai
 import base64
-from typing import List, Dict, Any
-from openai import OpenAI
+from dotenv import load_dotenv
+from pathlib import Path
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# Correctly load .env file from the project root
+env_path = Path(__file__).resolve().parents[3] / '.env'
+load_dotenv(dotenv_path=env_path)
 
-client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+# Get API key from environment
+api_key = os.getenv("OPENAI_API_KEY")
+if not api_key:
+    raise ValueError("OPENAI_API_KEY is not set in the .env file")
 
-def analyze_with_gpt4v(images_base64: List[str]) -> Dict[str, Any]:
+client = openai.OpenAI(api_key=api_key)
+
+def analyze_with_gpt4v(image_base64_list):
     """
-    Analyze images using GPT-4V
-    
-    Args:
-        images_base64: List of base64-encoded images
-        
-    Returns:
-        Dictionary with analysis results
+    Analyzes a list of base64-encoded images with GPT-4V.
     """
     try:
-        # Prepare messages with images
-        content = [
-            {
-                "type": "text",
-                "text": """Analyze these images and extract all text content. 
-                Provide structured output with:
-                - Extracted text
-                - Document type (if identifiable)
-                - Key information fields
-                - Confidence level
-                Format the response as JSON."""
-            }
-        ]
-        
-        # Add images to content
-        for img_b64 in images_base64:
-            content.append({
-                "type": "image_url",
-                "image_url": {
-                    "url": f"data:image/jpeg;base64,{img_b64}"
-                }
-            })
-        
-        # Call GPT-4V
         response = client.chat.completions.create(
             model="gpt-4-vision-preview",
-            messages=[{
-                "role": "user",
-                "content": content
-            }],
-            max_tokens=4096
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": "Analyze this image and extract all text, numbers, and symbols. If the image contains a form, provide the output as a JSON object with keys corresponding to the form's fields.",
+                        }
+                    ] + [
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": f"data:image/jpeg;base64,{img_b64}"
+                            }
+                        } for img_b64 in image_base64_list
+                    ],
+                }
+            ],
+            max_tokens=2000,
         )
-        
-        # Parse response
-        result_text = response.choices[0].message.content
-        
         return {
-            'success': True,
-            'data': {
-                'text': result_text,
-                'raw_response': result_text
-            },
-            'usage': {
-                'prompt_tokens': response.usage.prompt_tokens,
-                'completion_tokens': response.usage.completion_tokens,
-                'total_tokens': response.usage.total_tokens
-            }
+            "success": True,
+            "data": response.choices[0].message.content,
+            "usage": response.usage
         }
-        
     except Exception as e:
-        logger.error(f'GPT-4V analysis error: {str(e)}', exc_info=True)
-        return {
-            'success': False,
-            'error': str(e),
-            'error_type': type(e).__name__
-        }
+        return {"success": False, "error": str(e)}
