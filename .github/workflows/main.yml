@@ -12,6 +12,7 @@ jobs:
   validate-secrets:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
       - uses: actions/checkout@v4
       
       - name: Check Cloudflare Secrets
@@ -24,21 +25,35 @@ jobs:
             echo "❌ Error: CLOUDFLARE_ACCOUNT_ID secret is not set"
             exit 1
           fi
+          if [ -z "${{ secrets.R2_ACCOUNT_ID }}" ]; then
+            echo "❌ Error: R2_ACCOUNT_ID secret is not set"
+            exit 1
+          fi
+          if [ -z "${{ secrets.R2_ACCESS_KEY_ID }}" ]; then
+            echo "❌ Error: R2_ACCESS_KEY_ID secret is not set"
+            exit 1
+          fi
+          if [ -z "${{ secrets.R2_SECRET_ACCESS_KEY }}" ]; then
+            echo "❌ Error: R2_SECRET_ACCESS_KEY secret is not set"
+            exit 1
+          fi
           echo "✅ Cloudflare secrets are configured"
       
       - name: Check AWS Secrets
         run: |
           if [ -z "${{ secrets.AWS_ACCESS_KEY_ID }}" ]; then
-            echo "⚠️ Warning: AWS_ACCESS_KEY_ID secret is not set (needed for cron deployment)"
+            echo "⚠️ Warning: AWS_ACCESS_KEY_ID secret is not set (needed for cron/ocr deployment)"
           fi
           if [ -z "${{ secrets.AWS_SECRET_ACCESS_KEY }}" ]; then
-            echo "⚠️ Warning: AWS_SECRET_ACCESS_KEY secret is not set (needed for cron deployment)"
+            echo "⚠️ Warning: AWS_SECRET_ACCESS_KEY secret is not set (needed for cron/ocr deployment)"
           fi
           if [ -z "${{ secrets.AWS_REGION }}" ]; then
             echo "⚠️ Warning: AWS_REGION secret is not set (needed for cron deployment)"
           fi
-          if [ -z "${{ secrets.AWS_LAMBDA_FUNCTION_NAME }}" ]; then
-            echo "⚠️ Warning: AWS_LAMBDA_FUNCTION_NAME secret is not set (needed for cron deployment)"
+          if [ -z "${{ secrets.AWS_LAMBDA_CRON_FUNCTION_NAME }}" ]; then
+            echo "⚠️ Warning: AWS_LAMBDA_CRON_FUNCTION_NAME secret is not set (needed for cron deployment)"
+          if [ -z "${{ secrets.AWS_LAMBDA_OCR_FUNCTION_NAME }}" ]; then
+            echo "⚠️ Warning: AWS_LAMBDA_OCR_FUNCTION_NAME secret is not set (needed for ocr deployment)"
           fi
           echo "✅ Secret validation complete"
       
@@ -52,7 +67,7 @@ jobs:
         run: |
           if [ -n "${{ secrets.AWS_ACCESS_KEY_ID }}" ] && [ -n "${{ secrets.AWS_SECRET_ACCESS_KEY }}" ]; then
             chmod +x .github/utils/aws-lambda.sh
-            .github/utils/aws-lambda.sh "${{ secrets.AWS_ACCESS_KEY_ID }}" "${{ secrets.AWS_SECRET_ACCESS_KEY }}" "${{ secrets.AWS_REGION }}" "${{ secrets.AWS_LAMBDA_FUNCTION_NAME }}"
+            .github/utils/aws-lambda.sh "${{ secrets.AWS_ACCESS_KEY_ID }}" "${{ secrets.AWS_SECRET_ACCESS_KEY }}" "${{ secrets.AWS_REGION }}" "${{ secrets.AWS_LAMBDA_CRON_FUNCTION_NAME }}"
           else
             echo "⚠️  AWS credentials not configured - skipping Lambda verification"
           fi
@@ -66,9 +81,12 @@ jobs:
       api: ${{ steps.filter.outputs.api }}
       auth: ${{ steps.filter.outputs.auth }}
       cron: ${{ steps.filter.outputs.cron }}
+      ocr: ${{ steps.filter.outputs.ocr }}
     steps:
+      - name: Checkout code
       - uses: actions/checkout@v4
       
+      - name: Detect changed directory
       - uses: dorny/paths-filter@v3
         id: filter
         with:
@@ -83,12 +101,15 @@ jobs:
               - 'auth/**'
             cron:
               - 'cron/**'
+            ocr:
+              - 'ocr/**'
 
   deploy-site:
     needs: detect-changes
     if: needs.detect-changes.outputs.site == 'true'
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
       - uses: actions/checkout@v4
       
       - name: Setup Node.js
@@ -119,6 +140,7 @@ jobs:
     if: needs.detect-changes.outputs.app == 'true'
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
       - uses: actions/checkout@v4
       
       - name: Setup Node.js
@@ -166,6 +188,7 @@ jobs:
     if: needs.detect-changes.outputs.api == 'true'
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
       - uses: actions/checkout@v4
       
       - name: Setup Node.js
@@ -192,6 +215,7 @@ jobs:
     if: needs.detect-changes.outputs.auth == 'true'
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
       - uses: actions/checkout@v4
       
       - name: Setup Node.js
@@ -218,6 +242,7 @@ jobs:
     if: needs.detect-changes.outputs.cron == 'true'
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
       - uses: actions/checkout@v4
       
       - name: Setup Python
@@ -254,5 +279,89 @@ jobs:
         working-directory: ./cron
         run: |
           aws lambda update-function-code \
-            --function-name ${{ secrets.AWS_LAMBDA_FUNCTION_NAME }} \
+            --function-name ${{ secrets.AWS_LAMBDA_CRON_FUNCTION_NAME }} \
             --zip-file fileb://deployment-package.zip
+
+          - name: Update Lambda environment variables
+        run: |
+          aws lambda update-function-configuration \
+            --function-name ${{ secrets.AWS_LAMBDA_CRON_FUNCTION_NAME }} \
+            --environment "Variables={
+              R2_ACCOUNT_ID=${{ secrets.R2_ACCOUNT_ID }},
+              R2_ACCESS_KEY_ID=${{ secrets.R2_ACCESS_KEY_ID }},
+              R2_SECRET_ACCESS_KEY=${{ secrets.R2_SECRET_ACCESS_KEY }},
+              R2_BUCKET_NAME=${{ secrets.R2_BUCKET_NAME }},
+              OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+            }"
+      
+      - name: Get Function URL
+        run: |
+          FUNCTION_URL=$(aws lambda get-function-url-config \
+            --function-name ${{ secrets.AWS_LAMBDA_CRON_FUNCTION_NAME }} \
+            --query 'FunctionUrl' \
+            --output text 2>/dev/null || echo "No Function URL configured")
+          echo "OCR Lambda Function URL: $FUNCTION_URL"
+
+  deploy-ocr:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.ocr == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+      - uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'  # Changed from 3.13 to 3.11
+          cache: 'pip'
+          cache-dependency-path: ocr/requirements.txt
+      
+      - name: Install dependencies
+        working-directory: ./ocr
+        run: |
+          rm -rf ./package
+          mkdir -p ./package
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt -t ./package
+          cp -r src ./package/
+          cp -r alembic ./package/ 2>/dev/null || true
+          cp alembic.ini ./package/ 2>/dev/null || true
+      
+      - name: Create deployment package
+        working-directory: ./ocr/package
+        run: |
+          zip -r ../deployment-package.zip .
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      
+      - name: Deploy to AWS Lambda
+        working-directory: ./ocr
+        run: |
+          aws lambda update-function-code \
+            --function-name ${{ secrets.AWS_LAMBDA_CRON_FUNCTION_NAME }} \
+            --zip-file fileb://deployment-package.zip
+            - name: Update Lambda environment variables
+        run: |
+          aws lambda update-function-configuration \
+            --function-name ${{ secrets.AWS_LAMBDA_OCR_FUNCTION_NAME }} \
+            --environment "Variables={
+              R2_ACCOUNT_ID=${{ secrets.R2_ACCOUNT_ID }},
+              R2_ACCESS_KEY_ID=${{ secrets.R2_ACCESS_KEY_ID }},
+              R2_SECRET_ACCESS_KEY=${{ secrets.R2_SECRET_ACCESS_KEY }},
+              R2_BUCKET_NAME=${{ secrets.R2_BUCKET_NAME }},
+              OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+            }"
+
+      - name: Get Function URL
+        run: |
+          FUNCTION_URL=$(aws lambda get-function-url-config \
+            --function-name ${{ secrets.AWS_LAMBDA_OCR_FUNCTION_NAME }} \
+            --query 'FunctionUrl' \
+            --output text 2>/dev/null || echo "No Function URL configured")
+          echo "OCR Lambda Function URL: $FUNCTION_URL"
