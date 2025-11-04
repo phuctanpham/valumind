@@ -1,0 +1,13 @@
+valumind/
+└── predict/ # A machine learning project for making predictions.
+    ├── Dockerfile # Defines the Docker image for the application.
+    ├── README.md # Provides information about the project.
+    ├── docker-compose.yml # Defines the services, networks, and volumes for a multi-container Docker application.
+    ├── requirements.txt # Lists the Python dependencies for the project.
+    ├── app/ # Contains the Flask application for serving predictions.
+    │   ├── main.py # The main entry point for the Flask application.
+    │   └── schemas.py # Defines the data schemas for the application.
+    └── model_artifacts/ # Contains the trained model and other artifacts.
+        ├── lightgbm_model.txt # The trained LightGBM model.
+        ├── preprocessor.pkl # The preprocessor for the model.
+        └── train_model.py # The script for training the model.
