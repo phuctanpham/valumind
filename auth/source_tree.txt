@@ -1,0 +1,6 @@
+valumind/
+└── auth/ # The authentication service.
+    ├── package.json # Defines project metadata and dependencies.
+    ├── wrangler.toml # Cloudflare Wrangler configuration for deployment.
+    └── src/ # Source code for the authentication service.
+        └── main.ts # The entry point of the authentication service.

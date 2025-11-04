@@ -1,0 +1,33 @@
+valumind/
+└── hieu-app/
+    ├── README.md
+    ├── backend/
+    │   ├── auth.py
+    │   ├── auth_routes.py
+    │   ├── email_service.py
+    │   ├── image_analysis_service.py
+    │   ├── main.py
+    │   ├── models.py
+    │   ├── parsers.py
+    │   ├── requirements.txt
+    │   ├── schemas.py
+    │   └── valuation.py
+    └── frontend/
+        ├── next-env.d.ts
+        ├── next.config.mjs
+        ├── package.json
+        ├── pnpm-lock.yaml
+        ├── postcss.config.js
+        ├── postcss.config.mjs
+        ├── app/
+        │   ├── globals.css
+        │   ├── layout.tsx
+        │   └── page.tsx
+        ├── components/
+        │   ├── theme-provider.tsx
+        │   ├── auth/
+        │   ├── dashboard/
+        │   └── ui/
+        ├── public/
+        └── styles/
+            └── globals.css
