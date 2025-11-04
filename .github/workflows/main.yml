@@ -283,6 +283,11 @@ jobs:
             --function-name ${{ secrets.AWS_LAMBDA_CRON_FUNCTION_NAME }} \
             --zip-file fileb://deployment-package.zip
       
+      - name: Wait for Lambda update to complete
+        run: |
+          aws lambda wait function-updated \
+            --function-name ${{ secrets.AWS_LAMBDA_CRON_FUNCTION_NAME }}
+
       - name: Update Lambda environment variables
         run: |
           aws lambda update-function-configuration \
@@ -347,6 +352,11 @@ jobs:
           aws lambda update-function-code \
             --function-name ${{ secrets.AWS_LAMBDA_OCR_FUNCTION_NAME }} \
             --zip-file fileb://deployment-package.zip
+
+      - name: Wait for Lambda update to complete
+        run: |
+          aws lambda wait function-updated \
+            --function-name ${{ secrets.AWS_LAMBDA_OCR_FUNCTION_NAME }}
 
       - name: Update Lambda environment variables
         run: |
