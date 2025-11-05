@@ -6,7 +6,27 @@ compatibility_date = "2025-10-17"
 [vars]
 ENVIRONMENT = "production"
 
+[dev]
+ip = "127.0.0.1"
+port = 8787
+local_protocol = "http"
+
 [[d1_databases]]
 binding = "DB"
 database_name = "valumind-auth-db"
 database_id = "3bea4c95-7c28-4a1c-8ae8-1159726b27c7"
+
+[observability]
+enabled = true
+head_sampling_rate = 1
+
+[observability.logs]
+enabled = true
+head_sampling_rate = 1
+persist = true
+invocation_logs = true
+
+[observability.traces]
+enabled = true
+persist = true
+head_sampling_rate = 1
