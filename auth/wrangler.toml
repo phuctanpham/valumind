@@ -4,10 +4,10 @@ compatibility_date = "2025-10-17"
 
 [vars]
 ENVIRONMENT = "production"
-FRONTEND_URL = "http://localhost:3001"
-BACKEND_URL = "http://auth.vpbank.workers.dev"
+AUTH_GUI_URL = "https://auth.vpbank.workers.dev"
+AUTH_API_URL = "https://auth.vpbank.workers.dev/api"
 APP_URL = "http://localhost:3000"
-EMAIL_FROM = "noreply@yourdomain.com"
+EMAIL_FROM = "noreply@valumind.com"
 
 [dev]
 ip = "127.0.0.1"

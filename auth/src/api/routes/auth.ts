@@ -20,8 +20,8 @@ type Bindings = {
   JWT_SECRET: string;
   EMAIL_API_KEY: string;
   EMAIL_FROM: string;
-  FRONTEND_URL: string;
-  BACKEND_URL: string;
+  AUTH_GUI_URL: string;
+  AUTH_API_URL: string;
 };
 
 const auth = new Hono<{ Bindings: Bindings }>();
@@ -55,7 +55,7 @@ auth.post('/register', async (c) => {
     await setVerificationToken(c.env.DB, user.id, verificationToken, expiresAt);
     
     try {
-      const verificationUrl = `${c.env.BACKEND_URL || 'http://localhost:8787'}/api/auth/verify-email?token=${verificationToken}`;
+      const verificationUrl = `${c.env.AUTH_API_URL || 'http://localhost:8787/api'}/auth/verify-email?token=${verificationToken}`;
       const emailHtml = generateVerificationEmail(name, verificationUrl);
       await sendEmail(email, 'Verify Your Email', emailHtml, c.env.EMAIL_FROM, c.env.EMAIL_API_KEY);
     } catch (emailError) {
@@ -153,25 +153,25 @@ auth.get('/verify-email', async (c) => {
     const token = c.req.query('token');
     
     if (!token) {
-      return c.redirect(`${c.env.FRONTEND_URL}?error=invalid_token&message=Link xác thực không hợp lệ`);
+      return c.redirect(`${c.env.AUTH_GUI_URL}?error=invalid_token&message=Link xác thực không hợp lệ`);
     }
     
     const user = await getUserByVerificationToken(c.env.DB, token);
     
     if (!user) {
-      return c.redirect(`${c.env.FRONTEND_URL}?error=invalid_token&message=Link xác thực không hợp lệ`);
+      return c.redirect(`${c.env.AUTH_GUI_URL}?error=invalid_token&message=Link xác thực không hợp lệ`);
     }
     
     if (isTokenExpired(user.verification_token_expires)) {
-      return c.redirect(`${c.env.FRONTEND_URL}?error=expired_token&message=Link xác thực đã hết hạn`);
+      return c.redirect(`${c.env.AUTH_GUI_URL}?error=expired_token&message=Link xác thực đã hết hạn`);
     }
     
     await updateUserVerification(c.env.DB, user.id, true);
     
-    return c.redirect(`${c.env.FRONTEND_URL}?verified=true&message=Xác thực thành công!`);
+    return c.redirect(`${c.env.AUTH_GUI_URL}?verified=true&message=Xác thực thành công!`);
   } catch (error) {
     console.error('Verify email error:', error);
-    return c.redirect(`${c.env.FRONTEND_URL}?error=server_error&message=Lỗi xác thực`);
+    return c.redirect(`${c.env.AUTH_GUI_URL}?error=server_error&message=Lỗi xác thực`);
   }
 });
 
@@ -199,7 +199,7 @@ auth.post('/resend-verification', async (c) => {
     
     await setVerificationToken(c.env.DB, user.id, verificationToken, expiresAt);
     
-    const verificationUrl = `${c.env.BACKEND_URL || 'http://localhost:8787'}/api/auth/verify-email?token=${verificationToken}`;
+    const verificationUrl = `${c.env.AUTH_API_URL || 'http://localhost:8787/api'}/auth/verify-email?token=${verificationToken}`;
     const emailHtml = generateVerificationEmail(user.name || 'User', verificationUrl);
     
     await sendEmail(email, 'Verify Your Email', emailHtml, c.env.EMAIL_FROM, c.env.EMAIL_API_KEY);
@@ -237,7 +237,7 @@ auth.post('/forgot-password', async (c) => {
     
     await setResetToken(c.env.DB, user.id, resetToken, expiresAt);
     
-    const resetUrl = `${c.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+    const resetUrl = `${c.env.AUTH_GUI_URL}/reset-password?token=${resetToken}`;
     const emailHtml = generatePasswordResetEmail(user.name || 'User', resetUrl);
     
     await sendEmail(email, 'Reset Your Password', emailHtml, c.env.EMAIL_FROM, c.env.EMAIL_API_KEY);
