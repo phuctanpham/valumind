@@ -1,18 +1,30 @@
 import logging
+import sys
+import os
 from typing import List, Dict, Any
-import importlib
 from .preprocessing import preprocess_image
-from dotenv import load_dotenv
 
-# Load environment variables from .env file
-load_dotenv()
+# Add src directory to path
+src_path = os.path.join(os.path.dirname(__file__), '..')
+if src_path not in sys.path:
+    sys.path.insert(0, src_path)
 
-# Dynamically import from '3rd' directory
-openai_module = importlib.import_module('..3rd.openai', __package__)
+# Import from 3rd directory using importlib
+import importlib.util
+
+# Import openai module
+openai_path = os.path.join(src_path, '3rd', 'openai.py')
+spec = importlib.util.spec_from_file_location("openai_module", openai_path)
+openai_module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(openai_module)
 analyze_with_gpt4v = openai_module.analyze_with_gpt4v
-r2_module = importlib.import_module('..3rd.r2', __package__)
-upload_image_to_r2 = r2_module.upload_image_to_r2
 
+# Import r2 module
+r2_path = os.path.join(src_path, '3rd', 'r2.py')
+spec = importlib.util.spec_from_file_location("r2_module", r2_path)
+r2_module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(r2_module)
+upload_image_to_r2 = r2_module.upload_image_to_r2
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -48,8 +60,8 @@ def analyze_images(images_base64: List[str]) -> Dict[str, Any]:
             except Exception as e:
                 logger.warning(f'Failed to upload image {idx}: {e}')
         
-        # Analyze with GPT-4V (external service)
-        logger.info('Starting OCR analysis with GPT-4V...')
+        # Analyze with GPT-4 (external service)
+        logger.info('Starting OCR analysis with GPT-4...')
         analysis_result = analyze_with_gpt4v(preprocessed_images)
         
         if not analysis_result.get('success'):
