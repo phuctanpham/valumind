@@ -8,5 +8,7 @@ port = 8788
 local_protocol = "http"
 
 [vars]
-AUTH_API_URL = "http://127.0.0.1:8787"
-OCR_SRV_URL = "http://127.0.0.1:8789"
+# AUTH_API_URL = "http://127.0.0.1:8787"
+# OCR_SRV_URL = "http://127.0.0.1:8789"
+AUTH_API_URL = "https://auth.vpbank.workers.dev"
+OCR_SRV_URL = "https://fbjwmzfdhxwnliaao4fvip4qxi0cahya.lambda-url.ap-southeast-2.on.aws"

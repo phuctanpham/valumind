@@ -79,6 +79,7 @@ jobs:
     outputs:
       site: ${{ steps.filter.outputs.site }}
       app: ${{ steps.filter.outputs.app }}
+      warp: ${{ steps.filter.outputs.warp }}
       api: ${{ steps.filter.outputs.api }}
       auth: ${{ steps.filter.outputs.auth }}
       cron: ${{ steps.filter.outputs.cron }}
@@ -96,6 +97,8 @@ jobs:
               - 'site/**'
             app:
               - 'app/**'
+            warp:
+              - 'warp/**'
             api:
               - 'api/**'
             auth:
@@ -183,6 +186,33 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy ./${{ env.BUILD_DIR }} --project-name=app
           workingDirectory: ./app
+
+  deploy-warp:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.warp == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: warp/package-lock.json
+      
+      - name: Install dependencies
+        working-directory: ./warp
+        run: rm -rf node_modules && npm install && npm ci
+      
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy
+          workingDirectory: ./warp
 
   deploy-api:
     needs: detect-changes
