@@ -1,4 +1,0 @@
-# site/wrangler.toml
-name = "site"
-compatibility_date = "2025-10-17"
-pages_build_output_dir = "./build"

@@ -1,6 +1,0 @@
-{
-    "IDENTITY_PROVIDER_CONFIG": false,
-    "API_ENDPOINT_CONFIG": false,
-    "apiEndpoint": "PLACEHOLDER_API_URL",
-    "authEndpoint": "PLACEHOLDER_AUTH_URL"
-  }

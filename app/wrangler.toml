@@ -1,9 +1,0 @@
-# app/wrangler.toml
-name = "app"
-compatibility_date = "2025-10-17"
-pages_build_output_dir = "./build"
-
-[[app_cache]]
-binding = "app_cache"
-id = "e12207eca0bb41d6b801beef00fddfe5" # You need to replace this with your actual KV namespace ID
-preview_id = "e12207eca0bb41d6b801beef00fddfe5" # You need to replace this with your actual preview KV namespace ID

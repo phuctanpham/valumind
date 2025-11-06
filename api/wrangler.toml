@@ -1,7 +1,0 @@
-# api/wrangler.toml
-name = "api"
-main = "src/main.ts"
-compatibility_date = "2025-10-17"
-
-[vars]
-ENVIRONMENT = "production"
