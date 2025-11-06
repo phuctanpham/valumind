@@ -1,12 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
-  typescript: {
-    ignoreBuildErrors: true,
-  },
+  output: 'export', // Enable static export
   images: {
-    unoptimized: true,
+    unoptimized: true // Required for static export
   },
-}
+  // Remove trailing slashes for clean URLs
+  trailingSlash: true,
+};
 
-export default nextConfig
+export default nextConfig;

@@ -1,6 +1,13 @@
 name = "admin"
-compatibility_date = "2025-10-17"
-pages_build_output_dir = "./.next"
+compatibility_date = "2024-11-06"
+
+[site]
+bucket = "./out"
+
+[[redirects]]
+from = "/*"
+to = "/index.html"
+status = 200
 
 [[app_cache]]
 binding = "app_cache"
