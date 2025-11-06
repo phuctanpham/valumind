@@ -4,8 +4,8 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr
 from datetime import datetime, timedelta
-from backend.models import User, get_db
-from backend.auth import (
+from .models import User, get_db
+from .auth import (
     get_password_hash, 
     verify_password, 
     create_access_token, 
@@ -14,7 +14,7 @@ from backend.auth import (
     get_current_user,
     validate_password  
 )
-from backend.email_service import send_verification_email, send_password_reset_email
+from .email_service import send_verification_email, send_password_reset_email
 import os
 
 router = APIRouter(prefix="/api/auth", tags=["authentication"])

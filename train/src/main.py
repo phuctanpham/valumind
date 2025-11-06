@@ -10,9 +10,10 @@ import boto3
 from datetime import datetime
 from io import BytesIO
 
-from models import PropertyReport, PropertyImage, get_db
-from schemas import PropertyReportCreate
-from auth_middleware import get_current_user
+from .models import PropertyReport, PropertyImage, get_db
+from .schemas import PropertyReportCreate
+from .auth_middleware import get_current_user
+from .image_analysis_service import compress_image_if_needed, preprocess_image_for_ocr, convert_bytes_to_base64_for_analysis, analyze_images_to_property_form
 
 import logging
 logging.basicConfig(level=logging.INFO)
