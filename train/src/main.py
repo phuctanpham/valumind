@@ -28,7 +28,7 @@ app = FastAPI(title="AI Asset Valuation API")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:3000", 
+        "http://localhost:3002", 
         "http://localhost:5173",
         "http://localhost:8000",
         "http://localhost:8001",

@@ -72,7 +72,7 @@ export default function PropertyForm({ onValuationComplete }: PropertyFormProps)
       if (response.status === 401) {
         localStorage.removeItem("access_token")
         localStorage.removeItem("user")
-        const authUrl = process.env.NEXT_PUBLIC_AUTH_GUI_URL || "https://auth.vpbank.workers.dev"
+        const authUrl = process.env.AUTH_GUI_URL || "https://auth.vpbank.workers.dev"
         window.location.href = authUrl
         return
       }
@@ -192,7 +192,7 @@ export default function PropertyForm({ onValuationComplete }: PropertyFormProps)
       if (response.status === 401) {
         localStorage.removeItem("access_token")
         localStorage.removeItem("user")
-        const authUrl = process.env.NEXT_PUBLIC_AUTH_GUI_URL || "https://auth.vpbank.workers.dev"
+        const authUrl = process.env.AUTH_GUI_URL || "https://auth.vpbank.workers.dev"
         window.location.href = authUrl
         return
       }

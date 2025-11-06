@@ -21,7 +21,7 @@ export default function Dashboard() {
       
       if (!token) {
         // Redirect to auth frontend
-        const authUrl = process.env.NEXT_PUBLIC_AUTH_GUI_URL || "https://auth.vpbank.workers.dev"
+        const authUrl = process.env.AUTH_GUI_URL || "https://auth.vpbank.workers.dev"
         window.location.href = authUrl
         return
       }
@@ -29,7 +29,7 @@ export default function Dashboard() {
       // Validate token with auth service
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_AUTH_API_URL || 'https://auth.vpbank.workers.dev/api'}/auth/validate`,
+          `${process.env.AUTH_API_URL || 'https://auth.vpbank.workers.dev/api'}/auth/validate`,
           {
             headers: { 
               'Authorization': `Bearer ${token}` 
@@ -49,7 +49,7 @@ export default function Dashboard() {
         localStorage.removeItem("access_token")
         localStorage.removeItem("user")
         
-        const authUrl = process.env.NEXT_PUBLIC_AUTH_GUI_URL || "https://auth.vpbank.workers.dev"
+        const authUrl = process.env.AUTH_GUI_URL || "https://auth.vpbank.workers.dev"
         window.location.href = authUrl
       }
     }
@@ -61,7 +61,7 @@ export default function Dashboard() {
     localStorage.removeItem("access_token")
     localStorage.removeItem("user")
     // Redirect to auth GUI after logout
-    const authUrl = process.env.NEXT_PUBLIC_AUTH_GUI_URL || "https://auth.vpbank.workers.dev"
+    const authUrl = process.env.AUTH_GUI_URL || "https://auth.vpbank.workers.dev"
     window.location.href = authUrl
   }
 

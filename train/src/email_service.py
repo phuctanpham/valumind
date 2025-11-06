@@ -158,9 +158,9 @@ async def send_email(
         raise Exception(f"Email service error: {str(e)}")
 
 
-async def send_verification_email(email: str, token: str, backend_url: str) -> bool:
+async def send_verification_email(email: str, token: str, AUTH_API_URL: str) -> bool:
     """Send email verification"""
-    verification_url = f"{backend_url}/api/auth/verify-email?token={token}"
+    verification_url = f"{AUTH_API_URL}/api/auth/verify-email?token={token}"
     
     html_content = create_email_html(
         subject="Xác thực email của bạn",
@@ -187,9 +187,9 @@ async def send_verification_email(email: str, token: str, backend_url: str) -> b
     )
 
 
-async def send_password_reset_email(email: str, token: str, frontend_url: str) -> bool:
+async def send_password_reset_email(email: str, token: str, AUTH_GUI_URL: str) -> bool:
     """Send password reset email"""
-    reset_url = f"{frontend_url}/reset-password?token={token}"
+    reset_url = f"{AUTH_GUI_URL}/reset-password?token={token}"
     
     html_content = create_email_html(
         subject="Đặt lại mật khẩu",

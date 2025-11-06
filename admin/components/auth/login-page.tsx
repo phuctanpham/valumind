@@ -9,7 +9,7 @@ export default function LoginPage() {
     
     if (!token) {
       // Redirect to auth service
-      const authUrl = process.env.NEXT_PUBLIC_AUTH_GUI_URL || "https://auth.vpbank.workers.dev"
+      const authUrl = process.env.AUTH_GUI_URL || "https://auth.vpbank.workers.dev"
       const returnUrl = window.location.origin
       window.location.href = `${authUrl}?returnUrl=${encodeURIComponent(returnUrl)}`
     }

@@ -19,8 +19,8 @@ import os
 
 router = APIRouter(prefix="/api/auth", tags=["authentication"])
 
-FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
-BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
+AUTH_GUI_URL = os.getenv("AUTH_GUI_URL", "http://localhost:3001")
+AUTH_API_URL = os.getenv("AUTH_API_URL", "http://localhost:8000")
 
 # =====================================================
 # REQUEST/RESPONSE SCHEMAS
@@ -85,7 +85,7 @@ async def register(data: RegisterRequest, db: Session = Depends(get_db)):
         
         # Send verification email
         try:
-            await send_verification_email(data.email, verification_token, BACKEND_URL)
+            await send_verification_email(data.email, verification_token, AUTH_API_URL)
         except Exception as e:
             print(f"Failed to send verification email: {str(e)}")
             # Don't fail registration if email fails
@@ -117,13 +117,13 @@ async def verify_email(token: str = Query(...), db: Session = Depends(get_db)):
     
     if not user:
         return RedirectResponse(
-            url=f"{FRONTEND_URL}?error=invalid_token&message=Link xác thực không hợp lệ"
+            url=f"{AUTH_GUI_URL}?error=invalid_token&message=Link xác thực không hợp lệ"
         )
     
     # Check if token expired
     if user.verification_token_expires < datetime.utcnow():
         return RedirectResponse(
-            url=f"{FRONTEND_URL}?error=expired_token&message=Link xác thực đã hết hạn"
+            url=f"{AUTH_GUI_URL}?error=expired_token&message=Link xác thực đã hết hạn"
         )
     
     # Verify user
@@ -133,7 +133,7 @@ async def verify_email(token: str = Query(...), db: Session = Depends(get_db)):
     db.commit()
     
     return RedirectResponse(
-        url=f"{FRONTEND_URL}?verified=true&message=Xác thực thành công! Bạn có thể đăng nhập ngay."
+        url=f"{AUTH_GUI_URL}?verified=true&message=Xác thực thành công! Bạn có thể đăng nhập ngay."
     )
 
 
@@ -206,7 +206,7 @@ async def resend_verification(email: EmailStr, db: Session = Depends(get_db)):
     
     # Send email
     try:
-        await send_verification_email(email, verification_token, BACKEND_URL)
+        await send_verification_email(email, verification_token, AUTH_API_URL)
         return {
             "success": True,
             "message": "Email xác thực đã được gửi lại"
@@ -240,7 +240,7 @@ async def forgot_password(data: ForgotPasswordRequest, db: Session = Depends(get
     
     # Send email
     try:
-        await send_password_reset_email(data.email, reset_token, FRONTEND_URL)
+        await send_password_reset_email(data.email, reset_token, AUTH_GUI_URL)
     except Exception as e:
         print(f"Failed to send reset email: {str(e)}")
     

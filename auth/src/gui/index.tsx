@@ -8,7 +8,7 @@ gui.get('/assets/*', serveStatic({ root: './public' }));
 
 // Login page
 gui.get('/', (c) => {
-  const appUrl = c.env.APP_URL; // Get APP_URL from environment
+  const appUrl = c.env.ADMIN_GUI_URL; // Get ADMIN_GUI_URL from environment
 
   return c.html(`
 <!DOCTYPE html>
