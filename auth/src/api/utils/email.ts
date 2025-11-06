@@ -126,3 +126,45 @@ export async function sendEmail(
       </html>
     `;
   }
+
+  export function generateOtpEmail(otp: string): string {
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+          .header { font-size: 24px; font-weight: bold; text-align: center; margin-bottom: 20px; color: #444; }
+          .otp-code { 
+            font-size: 36px; 
+            font-weight: bold; 
+            text-align: center; 
+            letter-spacing: 4px;
+            color: #007BFF; 
+            background-color: #f2f2f2;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+          }
+          .warning { font-size: 14px; text-align: center; color: #888; margin-top: 15px; }
+          .footer { margin-top: 30px; font-size: 12px; color: #666; text-align: center; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">Your Verification Code</div>
+          <p>Please use the following code to complete your action. This code is valid for 10 minutes.</p>
+          <div class="otp-code">${otp}</div>
+          <div class="warning">
+            For your security, do not share this code with anyone.
+          </div>
+          <div class="footer">
+            <p>If you did not request this, please ignore this email.</p>
+            <p>&copy; 2025 Valumind. All rights reserved.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+  }

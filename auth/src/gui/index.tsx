@@ -8,6 +8,8 @@ gui.get('/assets/*', serveStatic({ root: './public' }));
 
 // Login page
 gui.get('/', (c) => {
+  const appUrl = c.env.APP_URL; // Get APP_URL from environment
+
   return c.html(`
 <!DOCTYPE html>
 <html lang="vi">
@@ -102,7 +104,7 @@ gui.get('/', (c) => {
           message.innerHTML = '<div class="message success">Login successful!</div>';
           localStorage.setItem('access_token', data.token);
           setTimeout(() => {
-            window.location.href = 'http://localhost:3000'; // Main app URL
+            window.location.href = '${appUrl}'; // Main app URL
           }, 1000);
         } else {
           message.innerHTML = '<div class="message error">' + data.error + '</div>';

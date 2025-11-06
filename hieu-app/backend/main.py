@@ -13,13 +13,10 @@ from io import BytesIO
 # ✅ CHANGE: Use relative imports instead of backend.
 from models import PropertyReport, PropertyImage, get_db
 from schemas import PropertyReportCreate
-from auth_middleware import get_current_user
-from image_analysis_service import (
-    analyze_images_to_property_form,
-    convert_bytes_to_base64_for_analysis,
-    compress_image_if_needed,
-    preprocess_image_for_ocr
-)
+from auth_middleware import get_current_user # New import for auth middleware
+# Removed: from backend.auth import get_current_user
+# Removed: from backend.auth_routes import router as auth_router
+
 import logging
 logging.basicConfig(level=logging.INFO)
 
@@ -46,7 +43,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# (phucpt) app.include_router(auth_router)
+# Removed: (phucpt) app.include_router(auth_router) - Old auth router removed
 
 # AWS S3
 s3_client = boto3.client(

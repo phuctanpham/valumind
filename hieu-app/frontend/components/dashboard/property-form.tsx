@@ -67,6 +67,15 @@ export default function PropertyForm({ onValuationComplete }: PropertyFormProps)
         headers: { Authorization: `Bearer ${token}` },
         body: formDataObj,
       })
+      
+      // Check for 401 and redirect to login
+      if (response.status === 401) {
+        localStorage.removeItem("access_token")
+        localStorage.removeItem("user")
+        const authUrl = process.env.NEXT_PUBLIC_AUTH_GUI_URL || "https://auth.vpbank.workers.dev"
+        window.location.href = authUrl
+        return
+      }
 
       const result = await response.json()
 
@@ -178,6 +187,15 @@ export default function PropertyForm({ onValuationComplete }: PropertyFormProps)
         },
         body: JSON.stringify(payload),
       })
+
+      // Check for 401 and redirect to login
+      if (response.status === 401) {
+        localStorage.removeItem("access_token")
+        localStorage.removeItem("user")
+        const authUrl = process.env.NEXT_PUBLIC_AUTH_GUI_URL || "https://auth.vpbank.workers.dev"
+        window.location.href = authUrl
+        return
+      }
 
       const result = await response.json()
 

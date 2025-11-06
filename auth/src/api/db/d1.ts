@@ -14,6 +14,14 @@ export interface User {
   updated_at: number;
 }
 
+export interface Otp {
+    id: number;
+    user_id: number;
+    otp: string;
+    expires_at: number;
+    created_at: number;
+}
+
 export async function createUser(
   db: D1Database,
   email: string,
@@ -136,4 +144,42 @@ export async function updatePassword(
     console.error('Update password error:', error);
     return false;
   }
+}
+
+export async function createOtp(
+    db: D1Database,
+    userId: number,
+    otp: string,
+    expiresAt: number
+): Promise<Otp | null> {
+    try {
+        // Clean up any existing OTPs for this user
+        await deleteOtp(db, userId);
+
+        const result = await db.prepare(
+            'INSERT INTO otps (user_id, otp, expires_at) VALUES (?, ?, ?) RETURNING *'
+        ).bind(userId, otp, expiresAt).first<Otp>();
+
+        return result;
+    } catch (error) {
+        console.error('Create OTP error:', error);
+        return null;
+    }
+}
+
+export async function getOtpByUserId(db: D1Database, userId: number): Promise<Otp | null> {
+    const otp = await db.prepare('SELECT * FROM otps WHERE user_id = ?')
+        .bind(userId)
+        .first<Otp>();
+    return otp;
+}
+
+export async function deleteOtp(db: D1Database, userId: number): Promise<boolean> {
+    try {
+        const result = await db.prepare('DELETE FROM otps WHERE user_id = ?').bind(userId).run();
+        return result.success || false;
+    } catch (error) {
+        console.error('Delete OTP error:', error);
+        return false;
+    }
 }

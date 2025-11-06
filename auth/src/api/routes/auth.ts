@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { hashPassword, verifyPassword } from '../utils/password';
-import { generateToken, verifyToken } from '../middleware/jwt';
+import { generateToken, verifyToken, generateSteppedUpToken } from '../middleware/jwt';
 import {
   createUser,
   getUserByEmail,
@@ -10,10 +10,13 @@ import {
   updateUserVerification,
   setVerificationToken,
   setResetToken,
-  updatePassword
+  updatePassword,
+  createOtp,
+  getOtpByUserId,
+  deleteOtp,
 } from '../db/d1';
-import { sendEmail, generateVerificationEmail, generatePasswordResetEmail } from '../utils/email';
-import { generateVerificationToken, addHours, isTokenExpired } from '../utils/token';
+import { sendEmail, generateVerificationEmail, generatePasswordResetEmail, generateOtpEmail } from '../utils/email';
+import { generateVerificationToken, addHours, isTokenExpired, generateNumericOtp } from '../utils/token';
 
 type Bindings = {
   DB: D1Database;
@@ -55,7 +58,7 @@ auth.post('/register', async (c) => {
     await setVerificationToken(c.env.DB, user.id, verificationToken, expiresAt);
     
     try {
-      const verificationUrl = `${c.env.AUTH_API_URL || 'http://localhost:8787/api'}/auth/verify-email?token=${verificationToken}`;
+      const verificationUrl = `${c.env.AUTH_API_URL}/auth/verify-email?token=${verificationToken}`;
       const emailHtml = generateVerificationEmail(name, verificationUrl);
       await sendEmail(email, 'Verify Your Email', emailHtml, c.env.EMAIL_FROM, c.env.EMAIL_API_KEY);
     } catch (emailError) {
@@ -199,7 +202,7 @@ auth.post('/resend-verification', async (c) => {
     
     await setVerificationToken(c.env.DB, user.id, verificationToken, expiresAt);
     
-    const verificationUrl = `${c.env.AUTH_API_URL || 'http://localhost:8787/api'}/auth/verify-email?token=${verificationToken}`;
+    const verificationUrl = `${c.env.AUTH_API_URL}/auth/verify-email?token=${verificationToken}`;
     const emailHtml = generateVerificationEmail(user.name || 'User', verificationUrl);
     
     await sendEmail(email, 'Verify Your Email', emailHtml, c.env.EMAIL_FROM, c.env.EMAIL_API_KEY);
@@ -313,6 +316,73 @@ auth.get('/validate', async (c) => {
     return c.json({ error: 'Invalid token' }, 401);
   }
 });
+
+// --- Step-Up Authentication ---
+
+const stepUp = new Hono<{ Bindings: Bindings }>();
+
+stepUp.post('/initiate', async (c) => {
+    try {
+        const { userId } = await c.req.json();
+        if (!userId) {
+            return c.json({ error: 'User ID is required' }, 400);
+        }
+
+        const user = await getUserById(c.env.DB, userId);
+        if (!user) {
+            return c.json({ error: 'User not found' }, 404);
+        }
+
+        // Generate OTP
+        const otp = generateNumericOtp(6);
+        const expiresAt = Math.floor(addHours(new Date(), 1/6).getTime() / 1000); // Expires in 10 minutes
+
+        // Store OTP in the database
+        await createOtp(c.env.DB, userId, otp, expiresAt);
+
+        // Send OTP via email
+        const emailHtml = generateOtpEmail(otp);
+        await sendEmail(user.email, 'Your Verification Code', emailHtml, c.env.EMAIL_FROM, c.env.EMAIL_API_KEY);
+
+        return c.json({ success: true, message: 'OTP has been sent to your email.' });
+    } catch (error) {
+        console.error('Step-up initiate error:', error);
+        return c.json({ error: 'Failed to initiate step-up authentication' }, 500);
+    }
+});
+
+stepUp.post('/verify', async (c) => {
+    try {
+        const { userId, otp } = await c.req.json();
+        if (!userId || !otp) {
+            return c.json({ error: 'User ID and OTP are required' }, 400);
+        }
+
+        const storedOtp = await getOtpByUserId(c.env.DB, userId);
+        if (!storedOtp || storedOtp.otp !== otp) {
+            return c.json({ error: 'Invalid OTP' }, 400);
+        }
+
+        if (isTokenExpired(storedOtp.expires_at)) {
+            return c.json({ error: 'OTP has expired' }, 400);
+        }
+
+        // OTP is valid, generate a new JWT with stepped_up claim
+        const steppedUpToken = await generateSteppedUpToken(userId, c.env.JWT_SECRET);
+
+        // Clean up OTP from database
+        await deleteOtp(c.env.DB, userId);
+
+        return c.json({ success: true, token: steppedUpToken });
+
+    } catch (error) {
+        console.error('Step-up verify error:', error);
+        return c.json({ error: 'Failed to verify step-up authentication' }, 500);
+    }
+});
+
+auth.route('/step-up', stepUp);
+
 
 // Logout
 auth.post('/logout', async (c) => {

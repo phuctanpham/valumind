@@ -3,14 +3,20 @@
     "version": "1.0.0",
     "type": "module",
     "scripts": {
-        "dev": "wrangler dev",
-        "deploy": "wrangler deploy"
+        "dev": "tsx src/local.ts --host 0.0.0.0 > /dev/null 2>&1 &",
+        "dev:wrangler": "wrangler dev",
+        "deploy:wrangler": "wrangler deploy",
+        "build": "tsc",
+        "start": "node dist/local.js"
     },
     "dependencies": {
-        "hono": "^4.0.0"
+        "hono": "^4.0.0",
+        "@hono/node-server": "^1.11.0"
     },
     "devDependencies": {
         "@cloudflare/workers-types": "^4.0.0",
-        "wrangler": "^4.43.0"
+        "wrangler": "^4.43.0",
+        "tsx": "^4.16.2",
+        "typescript": "^5.0.4"
     }
 }

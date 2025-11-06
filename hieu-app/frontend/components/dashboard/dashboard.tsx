@@ -11,28 +11,58 @@ type Page = "upload" | "valuation"
 export default function Dashboard() {
   const [currentPage, setCurrentPage] = useState<Page>("upload")
   const [user, setUser] = useState<any>(null)
-  const [valuationData, setValuationData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
+  const [valuationData, setValuationData] = useState<any>(null) // Keep existing state
 
   useEffect(() => {
-    const userData = localStorage.getItem("user")
-    if (userData) {
+    const validateAuth = async () => {
+      const token = localStorage.getItem("access_token")
+      
+      if (!token) {
+        // Redirect to auth frontend
+        const authUrl = process.env.NEXT_PUBLIC_AUTH_GUI_URL || "https://auth.vpbank.workers.dev"
+        window.location.href = authUrl
+        return
+      }
+      
+      // Validate token with auth service
       try {
-        setUser(JSON.parse(userData))
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_AUTH_API_URL || 'https://auth.vpbank.workers.dev/api'}/auth/validate`,
+          {
+            headers: { 
+              'Authorization': `Bearer ${token}` 
+            }
+          }
+        )
+        
+        if (!response.ok) {
+          throw new Error('Invalid token')
+        }
+        
+        const data = await response.json()
+        setUser(data)
+        setIsLoading(false)
       } catch (error) {
-        console.error("Failed to parse user data:", error)
-        localStorage.removeItem("user")
+        console.error('Auth validation failed:', error)
         localStorage.removeItem("access_token")
+        localStorage.removeItem("user")
+        
+        const authUrl = process.env.NEXT_PUBLIC_AUTH_GUI_URL || "https://auth.vpbank.workers.dev"
+        window.location.href = authUrl
       }
     }
-    setIsLoading(false)
-  }, [])
+    
+    validateAuth()
+  }, []) // Empty dependency array to run only once on mount
 
   const handleLogout = () => {
     localStorage.removeItem("access_token")
     localStorage.removeItem("user")
-    window.location.reload()
+    // Redirect to auth GUI after logout
+    const authUrl = process.env.NEXT_PUBLIC_AUTH_GUI_URL || "https://auth.vpbank.workers.dev"
+    window.location.href = authUrl
   }
 
   const handleValuationComplete = (data: any) => {
@@ -42,15 +72,16 @@ export default function Dashboard() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-cyan-50">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 mx-auto mb-4 animate-pulse"></div>
-          <p className="text-gray-600 font-medium">Đang tải...</p>
+          <p className="text-gray-600">Loading...</p>
         </div>
       </div>
     )
   }
 
+  // Rest of your existing Dashboard component code...
   return (
     <div className="min-h-screen bg-neutral-50">
       <Header user={user} onLogout={handleLogout} />

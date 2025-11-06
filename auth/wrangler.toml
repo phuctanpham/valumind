@@ -2,17 +2,30 @@ name = "auth"
 main = "src/main.ts"
 compatibility_date = "2025-10-17"
 
+# These are the variables for the production environment when deployed
 [vars]
 ENVIRONMENT = "production"
 AUTH_GUI_URL = "https://auth.vpbank.workers.dev"
 AUTH_API_URL = "https://auth.vpbank.workers.dev/api"
-APP_URL = "http://localhost:3000"
+APP_URL = "https://your-main-app-production-url.com" # IMPORTANT: Update with your actual production main app URL!
 EMAIL_FROM = "noreply@valumind.com"
+JWT_SECRET = "your-prod-jwt-secret-replace-me" # IMPORTANT: Set a strong, unique secret for production!
+EMAIL_API_KEY = "your-prod-email-api-key-replace-me" # IMPORTANT: Set your production email API key!
 
 [dev]
-ip = "127.0.0.1"
+ip = "0.0.0.0" # Configured to bind to all network interfaces for broader local accessibility
 port = 8787
 local_protocol = "http"
+
+# These are the variables for the local development environment
+[dev.vars]
+ENVIRONMENT = "development"
+AUTH_GUI_URL = "http://localhost:8787"
+AUTH_API_URL = "http://localhost:8787/api"
+APP_URL = "http://localhost:3000"
+EMAIL_FROM = "noreply@valumind.com"
+JWT_SECRET = "your-dev-jwt-secret-replace-me" # IMPORTANT: Set a strong, unique secret for development!
+EMAIL_API_KEY = "your-dev-email-api-key-replace-me" # IMPORTANT: Set your dev email API key (or mock)!
 
 [[d1_databases]]
 binding = "DB"

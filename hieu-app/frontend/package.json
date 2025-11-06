@@ -4,9 +4,14 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "dev": "next dev",
+    "dev": "next dev --hostname 0.0.0.0",
     "lint": "next lint",
-    "start": "next start"
+    "start": "next start",
+    "preview:wrangler": "npm run build && wrangler pages dev",
+    "deploy:wrangler": "npm run build && wrangler pages deploy",
+    "deploy:local": "npm run build && serve dist",
+    "deploy": "npm run deploy:wrangler",
+    "cf-typegen": "wrangler types"
   },
   "dependencies": {
     "@radix-ui/react-alert-dialog": "latest",

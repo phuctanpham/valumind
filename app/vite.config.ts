@@ -3,6 +3,9 @@ import react from '@vitejs/plugin-react-swc';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
+  server: {
+    port: 3005,
+  },
   plugins: [
     react(),
     VitePWA({
