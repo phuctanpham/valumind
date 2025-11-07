@@ -173,7 +173,11 @@ auth.get('/verify-email', async (c: Context) => {
     
     await updateUserVerification(c.env.DB, user.id, true);
     
-    return c.redirect(`${c.env.AUTH_GUI_URL}?verified=true&message=Xác thực thành công!`);
+    const redirectUrl = new URL(c.env.ADMIN_GUI_URL);
+    redirectUrl.searchParams.append('verified', 'true');
+    redirectUrl.searchParams.append('message', 'Xác thực thành công!');
+    return c.redirect(redirectUrl.toString());
+
   } catch (error) {
     console.error('Verify email error:', error);
     return c.redirect(`${c.env.AUTH_GUI_URL}?error=server_error&message=Lỗi xác thực`);
