@@ -1,7 +1,7 @@
-# Dockerfile (Cập nhật)
+# Dockerfile for AWS Lambda
 
-# BƯỚC 1: Chọn một base image Python ổn định
-FROM python:3.10-slim
+# BƯỚC 1: Chọn một base image Python ổn định cho Lambda
+FROM public.ecr.aws/lambda/python:3.10
 
 # =========================================================================
 # BƯỚC 1.5 (THÊM MỚI): Cài đặt các thư viện hệ thống cần thiết
@@ -13,15 +13,16 @@ RUN apt-get update && \
 # =========================================================================
 
 # BƯỚC 2: Thiết lập thư mục làm việc bên trong container
-WORKDIR /app
+WORKDIR /var/task
 
 # BƯỚC 3: Sao chép file requirements và cài đặt thư viện
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # BƯỚC 4: Sao chép toàn bộ mã nguồn của dự án vào container
-COPY ./app /app/app
-COPY ./model_artifacts /app/model_artifacts
+COPY ./src /var/task
+COPY ./model_artifacts /var/task/model_artifacts
+
 
 # BƯỚC 5: Thiết lập command mặc định để khởi chạy server
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["main.handler"]

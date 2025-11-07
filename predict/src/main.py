@@ -1,6 +1,5 @@
 # predict/src/main.py
 import json
-import joblib
 import lightgbm as lgb
 import pandas as pd
 import shap
@@ -101,7 +100,7 @@ def handler(event, context):
         if isinstance(event.get('body'), str):
             body = json.loads(event['body'])
         else:
-body = event
+            body = event
         
         # Validate input
         features = validate_input(body)
