@@ -11,13 +11,30 @@ export default function Home() {
   const router = useRouter()
 
   useEffect(() => {
-    const token = localStorage.getItem("access_token")
-    const user = localStorage.getItem("user")
+    const checkAuth = async () => {
+      try {
+        const token = localStorage.getItem("access_token")
+        const user = localStorage.getItem("user")
 
-    if (token && user) {
-      setIsAuthenticated(true)
+        console.log('🔍 Auth check:', { hasToken: !!token, hasUser: !!user })
+
+        if (token && user) {
+          console.log('✅ Token and user found, setting authenticated')
+          setIsAuthenticated(true)
+          setIsLoading(false)
+        } else {
+          console.log('❌ No token or user found')
+          setIsAuthenticated(false)
+          setIsLoading(false)
+        }
+      } catch (error) {
+        console.error('Auth check error:', error)
+        setIsAuthenticated(false)
+        setIsLoading(false)
+      }
     }
-    setIsLoading(false)
+
+    checkAuth()
   }, [])
 
   if (isLoading) {

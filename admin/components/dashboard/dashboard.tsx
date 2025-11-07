@@ -13,53 +13,52 @@ export default function Dashboard() {
   const [user, setUser] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
-  const [valuationData, setValuationData] = useState<any>(null) // Keep existing state
+  const [valuationData, setValuationData] = useState<any>(null)
 
   useEffect(() => {
-    const validateAuth = async () => {
-      const token = localStorage.getItem("access_token")
-      
-      if (!token) {
-        // Redirect to auth frontend
-        const authUrl = process.env.AUTH_GUI_URL || "https://auth.vpbank.workers.dev"
-        window.location.href = authUrl
-        return
-      }
-      
-      // Validate token with auth service
+    const loadUser = () => {
       try {
-        const response = await fetch(
-          `${process.env.AUTH_API_URL || 'http://localhost:8787'}/api/auth/validate`,
-          {
-            headers: { 
-              'Authorization': `Bearer ${token}` 
-            }
-          }
-        )
+        const token = localStorage.getItem("access_token")
+        const userStr = localStorage.getItem("user")
         
-        if (!response.ok) {
-          throw new Error('Invalid token')
+        console.log('📊 Dashboard loading:', { hasToken: !!token, hasUser: !!userStr })
+        
+        if (!token || !userStr) {
+          console.log('❌ No auth data, redirecting to login')
+          // Clear any partial data
+          localStorage.removeItem("access_token")
+          localStorage.removeItem("user")
+          
+          // Redirect to auth
+          const authUrl = process.env.AUTH_GUI_URL || "https://auth.vpbank.workers.dev"
+          const returnUrl = window.location.origin
+          window.location.href = `${authUrl}?returnUrl=${encodeURIComponent(returnUrl)}`
+          return
         }
         
-        const data = await response.json()
-        setUser(data)
+        const userData = JSON.parse(userStr)
+        console.log('✅ User data loaded:', userData.email)
+        setUser(userData)
         setIsLoading(false)
       } catch (error) {
-        console.error('Auth validation failed:', error)
+        console.error('❌ Error loading user:', error)
         localStorage.removeItem("access_token")
         localStorage.removeItem("user")
         
         const authUrl = process.env.AUTH_GUI_URL || "https://auth.vpbank.workers.dev"
-        window.location.href = authUrl
+        const returnUrl = window.location.origin
+        window.location.href = `${authUrl}?returnUrl=${encodeURIComponent(returnUrl)}`
       }
     }
     
-    validateAuth()
-  }, []) // Empty dependency array to run only once on mount
+    loadUser()
+  }, [])
 
   const handleLogout = () => {
+    console.log('🚪 Logging out')
     localStorage.removeItem("access_token")
     localStorage.removeItem("user")
+    
     // Redirect to auth GUI after logout
     const authUrl = process.env.AUTH_GUI_URL || "https://auth.vpbank.workers.dev"
     window.location.href = authUrl
@@ -81,7 +80,6 @@ export default function Dashboard() {
     )
   }
 
-  // Rest of your existing Dashboard component code...
   return (
     <div className="min-h-screen bg-neutral-50">
       <Header user={user} onLogout={handleLogout} />
