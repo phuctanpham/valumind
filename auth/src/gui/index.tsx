@@ -1,14 +1,25 @@
 import { Hono } from 'hono';
 import { serveStatic } from 'hono/cloudflare-workers';
 
-const gui = new Hono();
+type Bindings = {
+  DB: D1Database;
+  JWT_SECRET: string;
+  EMAIL_API_KEY: string;
+  EMAIL_FROM: string;
+  AUTH_GUI_URL: string;
+  AUTH_API_URL: string;
+  ADMIN_GUI_URL: string;
+};
+
+const gui = new Hono<{ Bindings: Bindings }>();
 
 // Serve static assets
 gui.get('/assets/*', serveStatic({ root: './public' }));
 
 // Login page
 gui.get('/', (c) => {
-  const appUrl = c.env.ADMIN_GUI_URL; // Get ADMIN_GUI_URL from environment
+  // Get returnUrl from query params, or use default ADMIN_GUI_URL
+  const returnUrl = c.req.query('returnUrl') || c.env.ADMIN_GUI_URL || 'http://localhost:3002';
 
   return c.html(`
 <!DOCTYPE html>
@@ -54,6 +65,7 @@ gui.get('/', (c) => {
       font-size: 1rem;
     }
     button:hover { background: #5568d3; }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
     .message { 
       padding: 0.75rem;
       margin-bottom: 1rem;
@@ -70,12 +82,14 @@ gui.get('/', (c) => {
     <form id="loginForm">
       <input type="email" id="email" placeholder="Email" required />
       <input type="password" id="password" placeholder="Password" required />
-      <button type="submit">Login</button>
+      <button type="submit" id="loginBtn">Login</button>
     </form>
   </div>
   <script>
     const form = document.getElementById('loginForm');
     const message = document.getElementById('message');
+    const loginBtn = document.getElementById('loginBtn');
+    const returnUrl = '${returnUrl}';
     
     // Show URL params messages
     const params = new URLSearchParams(window.location.search);
@@ -88,6 +102,11 @@ gui.get('/', (c) => {
     
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      
+      // Disable button during request
+      loginBtn.disabled = true;
+      loginBtn.textContent = 'Logging in...';
+      
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
       
@@ -101,16 +120,25 @@ gui.get('/', (c) => {
         const data = await res.json();
         
         if (res.ok) {
-          message.innerHTML = '<div class="message success">Login successful!</div>';
+          message.innerHTML = '<div class="message success">Login successful! Redirecting...</div>';
+          
+          // Store token and user data in localStorage
           localStorage.setItem('access_token', data.token);
-          setTimeout(() => {
-            window.location.href = '${appUrl}'; // Main app URL
-          }, 1000);
+          localStorage.setItem('user', JSON.stringify(data.user));
+          
+          // Redirect to the return URL
+          console.log('Redirecting to:', returnUrl);
+          window.location.href = returnUrl;
         } else {
-          message.innerHTML = '<div class="message error">' + data.error + '</div>';
+          message.innerHTML = '<div class="message error">' + (data.error || 'Login failed') + '</div>';
+          loginBtn.disabled = false;
+          loginBtn.textContent = 'Login';
         }
       } catch (err) {
-        message.innerHTML = '<div class="message error">Network error</div>';
+        console.error('Login error:', err);
+        message.innerHTML = '<div class="message error">Network error. Please try again.</div>';
+        loginBtn.disabled = false;
+        loginBtn.textContent = 'Login';
       }
     });
   </script>
