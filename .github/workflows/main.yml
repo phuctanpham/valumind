@@ -222,10 +222,10 @@ jobs:
       - name: Check build output
         working-directory: ./admin
         run: |
-          echo "Checking for build directories..."
-          if [ -d "dist" ]; then
-            echo "✅ Found dist directory"
-            BUILD_DIR="dist"
+          echo "Checking for out directories..."
+          if [ -d "out" ]; then
+            echo "✅ Found out directory"
+            BUILD_DIR="out"
           elif [ -d "build" ]; then
             echo "✅ Found build directory"
             BUILD_DIR="build"
