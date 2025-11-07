@@ -9,6 +9,7 @@ type Bindings = {
   EMAIL_FROM: string;
   AUTH_GUI_URL: string;
   AUTH_API_URL: string;
+  ADMIN_GUI_URL: string;
 };
 
 const app = new Hono<{ Bindings: Bindings }>();

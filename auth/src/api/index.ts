@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import authRoutes from './routes/auth';
+import auth from './routes/auth';
 
 type Bindings = {
   DB: D1Database;
@@ -7,6 +7,8 @@ type Bindings = {
   EMAIL_API_KEY: string;
   EMAIL_FROM: string;
   AUTH_GUI_URL: string;
+  AUTH_API_URL: string;
+  ADMIN_GUI_URL: string;
 };
 
 const api = new Hono<{ Bindings: Bindings }>();
@@ -20,7 +22,7 @@ api.get('/health', (c) => {
   });
 });
 
-// Mount auth routes at /api/auth
-api.route('/auth', authRoutes);
+// Mount auth routes at /auth
+api.route('/auth', auth);
 
 export default api;

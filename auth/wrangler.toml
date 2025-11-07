@@ -7,8 +7,9 @@ ENVIRONMENT = "production"
 AUTH_GUI_URL = "https://auth.vpbank.workers.dev"
 AUTH_API_URL = "https://auth.vpbank.workers.dev"
 ADMIN_GUI_URL = "https://appraiser.pages.dev"
-JWT_SECRET = "your-prod-jwt-secret-replace-me"
-EMAIL_API_KEY = "your-prod-email-api-key-replace-me"
+EMAIL_FROM = "{{EMAIL_ADDRESS}}"
+JWT_SECRET = "{{JWT_SECRET}}"
+EMAIL_API_KEY = "{{EMAIL_API_KEY}}"
 
 [dev]
 ip = "0.0.0.0"
@@ -20,9 +21,9 @@ ENVIRONMENT = "development"
 AUTH_GUI_URL = "http://localhost:8787"
 AUTH_API_URL = "http://localhost:8787"
 ADMIN_GUI_URL = "http://localhost:3002"
-EMAIL_FROM = "noreply@valumind.com"
-JWT_SECRET = "your-dev-jwt-secret-replace-me" # IMPORTANT: Set a strong, unique secret for development!
-EMAIL_API_KEY = "your-dev-email-api-key-replace-me" # IMPORTANT: Set your dev email API key (or mock)!
+EMAIL_FROM = "{{EMAIL_ADDRESS}}"
+JWT_SECRET = "{{JWT_SECRET}}"
+EMAIL_API_KEY = "{{EMAIL_API_KEY}}"
 
 [[d1_databases]]
 binding = "DB"
