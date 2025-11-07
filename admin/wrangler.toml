@@ -1,8 +1,6 @@
 name = "admin"
 compatibility_date = "2024-11-06"
-
-[site]
-bucket = "./out"
+pages_build_output_dir = "out"
 
 [[redirects]]
 from = "/*"

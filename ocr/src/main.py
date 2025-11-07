@@ -1,8 +1,8 @@
+# ocr/src/main.py
 import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List
-import os
 from .utils.analysis import analyze_images
 
 app = FastAPI()

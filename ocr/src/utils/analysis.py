@@ -1,90 +1,91 @@
-import logging
-import sys
-import os
+# ocr/src/utils/analysis.py
 from typing import List, Dict, Any
-from .preprocessing import preprocess_image
+import base64
+import json
+from io import BytesIO
+from PIL import Image
+from openai import OpenAI
+import os
 
-# Add src directory to path
-src_path = os.path.join(os.path.dirname(__file__), '..')
-if src_path not in sys.path:
-    sys.path.insert(0, src_path)
-
-# Import from 3rd directory using importlib
-import importlib.util
-
-# Import openai module
-openai_path = os.path.join(src_path, '3rd', 'openai.py')
-spec = importlib.util.spec_from_file_location("openai_module", openai_path)
-openai_module = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(openai_module)
-analyze_with_gpt4v = openai_module.analyze_with_gpt4v
-
-# Import r2 module
-r2_path = os.path.join(src_path, '3rd', 'r2.py')
-spec = importlib.util.spec_from_file_location("r2_module", r2_path)
-r2_module = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(r2_module)
-upload_image_to_r2 = r2_module.upload_image_to_r2
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 def analyze_images(images_base64: List[str]) -> Dict[str, Any]:
     """
-    Main OCR analysis function
-    
-    Args:
-        images_base64: List of base64-encoded images
-        
-    Returns:
-        Dictionary with analysis results
+    Unified OCR analysis for both train and predict services
+    Returns standardized schema compatible with both
     """
     try:
-        # Preprocess images
-        logger.info('Preprocessing images...')
-        preprocessed_images = []
-        uploaded_urls = []
+        # Build GPT-4V prompt
+        system_prompt = """Extract real estate property information from images.
+Return JSON with ALL fields below. Use null if not found."""
+
+        user_prompt = """Extract and return JSON:
+{
+  "property_info": {
+    "address": "string or null",
+    "property_type": "house/apartment/land or null",
+    "usable_area_m2": "number or null",
+    "land_area_m2": "number or null",
+    "bedrooms": "integer or null",
+    "bathrooms": "integer or null",
+    "floors": "integer or null",
+    "direction": "string or null",
+    "balcony_direction": "string or null",
+    "legal_status": "string or null",
+    "furniture_status": "string or null",
+    "width_m": "number or null",
+    "length_m": "number or null",
+    "price_per_m2_vnd": "number or null",
+    "longitude": "number or null",
+    "latitude": "number or null",
+    "region": "string or null",
+    "area": "string or null"
+  },
+  "condition_assessment": {
+    "overall_condition": "string or null",
+    "cleanliness": "string or null",
+    "maintenance_status": "string or null",
+    "major_issues": [],
+    "overall_description": "string or null"
+  }
+}"""
+
+        # Build content
+        content = [{"type": "text", "text": user_prompt}]
+        for img_b64 in images_base64:
+            content.append({
+                "type": "image_url",
+                "image_url": {
+                    "url": f"data:image/jpeg;base64,{img_b64}",
+                    "detail": "high"
+                }
+            })
+
+        # Call OpenAI
+        response = openai_client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": content}
+            ],
+            max_tokens=2000,
+            temperature=0
+        )
+
+        # Parse response
+        response_text = response.choices[0].message.content.strip()
+        if response_text.startswith("```json"):
+            response_text = response_text.replace("```json", "").replace("```", "").strip()
         
-        for idx, img_b64 in enumerate(images_base64):
-            # Preprocess (local processing)
-            processed_b64 = preprocess_image(img_b64)
-            preprocessed_images.append(processed_b64)
-            
-            # Upload to R2 (external service)
-            try:
-                url = upload_image_to_r2(processed_b64, f'image_{idx}')
-                uploaded_urls.append({
-                    'index': idx,
-                    'url': url
-                })
-            except Exception as e:
-                logger.warning(f'Failed to upload image {idx}: {e}')
+        result = json.loads(response_text)
         
-        # Analyze with GPT-4 (external service)
-        logger.info('Starting OCR analysis with GPT-4...')
-        analysis_result = analyze_with_gpt4v(preprocessed_images)
-        
-        if not analysis_result.get('success'):
-            return {
-                'success': False,
-                'error': analysis_result.get('error', 'Analysis failed')
-            }
-        
-        # Combine results
         return {
-            'success': True,
-            'data': analysis_result.get('data'),
-            'images': uploaded_urls,
-            'usage': analysis_result.get('usage'),
-            'metadata': {
-                'images_count': len(images_base64)
-            }
+            "success": True,
+            "data": result
         }
         
     except Exception as e:
-        logger.error(f'Analysis error: {str(e)}', exc_info=True)
         return {
-            'success': False,
-            'error': str(e),
-            'error_type': type(e).__name__
+            "success": False,
+            "error": str(e)
         }

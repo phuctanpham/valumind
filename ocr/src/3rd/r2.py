@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 R2_ACCOUNT_ID = os.getenv('R2_ACCOUNT_ID')
 R2_ACCESS_KEY_ID = os.getenv('R2_ACCESS_KEY_ID')
 R2_SECRET_ACCESS_KEY = os.getenv('R2_SECRET_ACCESS_KEY')
-R2_BUCKET_NAME = os.getenv('R2_BUCKET_NAME', 'valumind-ocr-images')
+R2_BUCKET_NAME = os.getenv('R2_BUCKET_NAME')
 
 # Initialize S3 client for R2
 s3_client = boto3.client(
