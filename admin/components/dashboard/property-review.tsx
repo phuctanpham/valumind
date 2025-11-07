@@ -9,16 +9,16 @@ interface PropertyReviewProps {
   uploadedFiles: any[]
   onComplete: (data: any) => void
   onBack: () => void
+  isSubmitting: boolean
 }
 
-export default function PropertyReview({ formData, uploadedFiles, onComplete, onBack }: PropertyReviewProps) {
+export default function PropertyReview({ formData, uploadedFiles, onComplete, onBack, isSubmitting }: PropertyReviewProps) {
   const [data, setData] = useState(formData)
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     basic: true,
     condition: true,
     issues: true,
   })
-  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const prop = data.property_info || {}
   const cond = data.condition_assessment || {}
@@ -38,12 +38,7 @@ export default function PropertyReview({ formData, uploadedFiles, onComplete, on
   }
 
   const handleSubmit = async () => {
-    setIsSubmitting(true)
-    try {
-      await onComplete(data)
-    } finally {
-      setIsSubmitting(false)
-    }
+    await onComplete(data)
   }
 
   return (

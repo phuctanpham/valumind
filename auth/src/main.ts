@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { verify } from 'hono/jwt'
-import { InternalServerError, UnauthorizedError } from './api/errors'
+import { InternalServerError, UnauthorizedError } from '../errors'
 import { generateAccessToken, generateRefreshToken } from './api/middleware/jwt'
 
 const app = new Hono()
