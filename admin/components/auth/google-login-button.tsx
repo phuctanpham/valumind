@@ -8,7 +8,7 @@ declare global {
   }
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_LOCALHOST
+const API_BASE_URL = process.env.WARP_URL || process.env.NEXT_PUBLIC_LOCALHOST
 
 export default function GoogleLoginButton() {
   useEffect(() => {

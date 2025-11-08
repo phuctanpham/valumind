@@ -11,7 +11,7 @@ status = 200
 
 [vars]
 ENVIRONMENT = "production"
-NEXT_PUBLIC_API_URL="https://mkvzeqdqml7ktylf7dcpejbiu40mfudf.lambda-url.ap-southeast-2.on.aws"
+WARP_URL="{{serect.WARP_URL}}"
 NEXT_PUBLIC_LOCALHOST="http://localhost:8000"
 NEXT_PUBLIC_GOOGLE_CLIENT_ID=
 

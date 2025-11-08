@@ -6,7 +6,7 @@ import { Mail, Lock, Loader2, Home, AlertCircle, CheckCircle } from "lucide-reac
 import GoogleLoginButton from "./google-login-button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_LOCALHOST
+const API_BASE_URL = process.env.WARP_URL || process.env.NEXT_PUBLIC_LOCALHOST
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")

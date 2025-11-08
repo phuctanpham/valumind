@@ -158,9 +158,9 @@ async def send_email(
         raise Exception(f"Email service error: {str(e)}")
 
 
-async def send_verification_email(email: str, token: str, backend_url: str) -> bool:
+async def send_verification_email(email: str, token: str, WARP: str) -> bool:
     """Send email verification"""
-    verification_url = f"{backend_url}/api/auth/verify-email?token={token}"
+    verification_url = f"{WARP}/api/auth/verify-email?token={token}"
     
     html_content = create_email_html(
         subject="Xác thực email của bạn",
