@@ -12,7 +12,61 @@ jobs:
   validate-secrets:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Check package size
+        working-directory: ./predict
+        run: |
+          SIZE=$(du -h deployment-package.zip | cut -f1)
+          echo "📦 Package size: $SIZE"
+          SIZE_BYTES=$(stat -f%z deployment-package.zip 2>/dev/null || stat -c%s deployment-package.zip)
+          if [ $SIZE_BYTES -gt 52428800 ]; then
+            echo "⚠️  Warning: Package exceeds 50MB uncompressed limit"
+          fi
+      
+      - name: Deploy to AWS Lambda
+        working-directory: ./predict
+        run: |
+          aws lambda update-function-code \
+            --function-name ${{ secrets.AWS_LAMBDA_PREDICT_FUNCTION_NAME }} \
+            --zip-file fileb://deployment-package.zip
+      
+      - name: Wait for Lambda update to complete
+        run: |
+          aws lambda wait function-updated \
+            --function-name ${{ secrets.AWS_LAMBDA_PREDICT_FUNCTION_NAME }}
+      
+      - name: Update Lambda configuration
+        run: |
+          aws lambda update-function-configuration \
+            --function-name ${{ secrets.AWS_LAMBDA_PREDICT_FUNCTION_NAME }} \
+            --timeout 900 \
+            --memory-size 3000 \
+            --environment "Variables={
+              MODEL_PATH=/var/task/lightgbm_model.txt,
+              DATABASE_URL=${{ secrets.DATABASE_URL }},
+              BUCKET_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }},
+              BUCKET_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }},
+              BUCKET_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }},
+              BUCKET_NAME=${{ secrets.AWS_BUCKET_NAME }},
+              BUCKET_REGION=${{ secrets.AWS_REGION }},
+              OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }},
+              WARP_KEY=${{ secrets.WARP_KEY }},
+              SMTP_HOST=${{ secrets.SMTP_HOST }},
+              SMTP_PORT=${{ secrets.SMTP_PORT }},
+              SMTP_USERNAME=${{ secrets.SMTP_USERNAME }},
+              SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }},
+              SMTP_FROM_EMAIL=${{ secrets.SMTP_FROM_EMAIL }},
+              SMTP_FROM_NAME=${{ secrets.SMTP_FROM_NAME }},
+              ADMIN_URL=${{ secrets.ADMIN_URL }},
+              WARP_URL=${{ secrets.WARP_URL }}
+            }"
+      
+      - name: Get Function URL
+        run: |
+          FUNCTION_URL=$(aws lambda get-function-url-config \
+            --function-name ${{ secrets.AWS_LAMBDA_PREDICT_FUNCTION_NAME }} \
+            --query 'FunctionUrl' \
+            --output text 2>/dev/null || echo "No Function URL configured")
+          echo "🔗 PREDICT Lambda Function URL: $FUNCTION_URL" Checkout code
         uses: actions/checkout@v4
       
       - name: Check Cloudflare Secrets
@@ -188,7 +242,7 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: app/package-lock.json
+          cache-dependency-path: admin/package-lock.json
       
       - name: Install dependencies
         working-directory: ./admin
@@ -199,13 +253,13 @@ jobs:
         run: npm run build
       
       - name: Check build output
-        working-directory: ./out
+        working-directory: ./admin
         run: |
-          echo "Checking for out directories..."
+          echo "Checking for build directories..."
           if [ -d "out" ]; then
             echo "✅ Found out directory"
             BUILD_DIR="out"
-          elif [ -d "" ]; then
+          elif [ -d "build" ]; then
             echo "✅ Found build directory"
             BUILD_DIR="build"
           else
@@ -277,7 +331,7 @@ jobs:
           command: deploy
           workingDirectory: ./auth
 
-deploy-warp:
+  deploy-warp:
     needs: detect-changes
     if: needs.detect-changes.outputs.warp == 'true'
     runs-on: ubuntu-latest
@@ -298,11 +352,8 @@ deploy-warp:
           rm -rf ./package
           mkdir -p ./package
           python -m pip install --upgrade pip
-          # Install dependencies with specific platform targeting
           pip install --platform manylinux2014_x86_64 --only-binary=:all: -r requirements.txt -t ./package
-          # Copy source files with proper structure
           cp -r src ./package/
-          # Copy handler if exists
           if [ -f "lambda_handler.py" ]; then
             cp lambda_handler.py ./package/
           fi
@@ -310,13 +361,11 @@ deploy-warp:
       - name: Create deployment package
         working-directory: ./warp/package
         run: |
-          # Remove unnecessary files to reduce size
           find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
           find . -type d -name "*.dist-info" -exec rm -rf {} + 2>/dev/null || true
           find . -type d -name "tests" -exec rm -rf {} + 2>/dev/null || true
           find . -type f -name "*.pyc" -delete
           find . -type f -name "*.pyo" -delete
-          # Create zip
           zip -r9 ../deployment-package.zip . -x "*.git*" "*.pyc" "*__pycache__*"
       
       - name: Check package size
@@ -342,18 +391,18 @@ deploy-warp:
           aws lambda update-function-code \
             --function-name ${{ secrets.AWS_LAMBDA_WARP_FUNCTION_NAME }} \
             --zip-file fileb://deployment-package.zip
-
+      
       - name: Wait for Lambda update to complete
         run: |
           aws lambda wait function-updated \
             --function-name ${{ secrets.AWS_LAMBDA_WARP_FUNCTION_NAME }}
-
+      
       - name: Update Lambda configuration
         run: |
           aws lambda update-function-configuration \
             --function-name ${{ secrets.AWS_LAMBDA_WARP_FUNCTION_NAME }} \
             --timeout 900 \
-            --memory-size 1024 \
+            --memory-size 3000 \
             --environment "Variables={
               DATABASE_URL=${{ secrets.DATABASE_URL }},
               BUCKET_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }},
@@ -372,7 +421,7 @@ deploy-warp:
               ADMIN_URL=${{ secrets.ADMIN_URL }},
               WARP_URL=${{ secrets.WARP_URL }}
             }"
-
+      
       - name: Get Function URL
         run: |
           FUNCTION_URL=$(aws lambda get-function-url-config \
@@ -418,6 +467,16 @@ deploy-warp:
           find . -type f -name "*.pyo" -delete
           zip -r9 ../deployment-package.zip . -x "*.git*" "*.pyc" "*__pycache__*"
       
+      - name: Check package size
+        working-directory: ./cron
+        run: |
+          SIZE=$(du -h deployment-package.zip | cut -f1)
+          echo "📦 Package size: $SIZE"
+          SIZE_BYTES=$(stat -f%z deployment-package.zip 2>/dev/null || stat -c%s deployment-package.zip)
+          if [ $SIZE_BYTES -gt 52428800 ]; then
+            echo "⚠️  Warning: Package exceeds 50MB uncompressed limit"
+          fi
+      
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -436,20 +495,30 @@ deploy-warp:
         run: |
           aws lambda wait function-updated \
             --function-name ${{ secrets.AWS_LAMBDA_CRON_FUNCTION_NAME }}
-
+      
       - name: Update Lambda configuration
         run: |
           aws lambda update-function-configuration \
             --function-name ${{ secrets.AWS_LAMBDA_CRON_FUNCTION_NAME }} \
-            --timeout 300 \
-            --memory-size 512 \
+            --timeout 900 \
+            --memory-size 3000 \
             --environment "Variables={
               DATABASE_URL=${{ secrets.DATABASE_URL }},
               BUCKET_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }},
               BUCKET_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }},
               BUCKET_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }},
               BUCKET_NAME=${{ secrets.AWS_BUCKET_NAME }},
-              BUCKET_REGION=${{ secrets.AWS_REGION }}
+              BUCKET_REGION=${{ secrets.AWS_REGION }},
+              OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }},
+              WARP_KEY=${{ secrets.WARP_KEY }},
+              SMTP_HOST=${{ secrets.SMTP_HOST }},
+              SMTP_PORT=${{ secrets.SMTP_PORT }},
+              SMTP_USERNAME=${{ secrets.SMTP_USERNAME }},
+              SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }},
+              SMTP_FROM_EMAIL=${{ secrets.SMTP_FROM_EMAIL }},
+              SMTP_FROM_NAME=${{ secrets.SMTP_FROM_NAME }},
+              ADMIN_URL=${{ secrets.ADMIN_URL }},
+              WARP_URL=${{ secrets.WARP_URL }}
             }"
       
       - name: Get Function URL
@@ -486,7 +555,7 @@ deploy-warp:
           if [ -f "lambda_handler.py" ]; then
             cp lambda_handler.py ./package/
           fi
-
+      
       - name: Create deployment package
         working-directory: ./train/package
         run: |
@@ -496,6 +565,16 @@ deploy-warp:
           find . -type f -name "*.pyc" -delete
           find . -type f -name "*.pyo" -delete
           zip -r9 ../deployment-package.zip . -x "*.git*" "*.pyc" "*__pycache__*"
+      
+      - name: Check package size
+        working-directory: ./train
+        run: |
+          SIZE=$(du -h deployment-package.zip | cut -f1)
+          echo "📦 Package size: $SIZE"
+          SIZE_BYTES=$(stat -f%z deployment-package.zip 2>/dev/null || stat -c%s deployment-package.zip)
+          if [ $SIZE_BYTES -gt 52428800 ]; then
+            echo "⚠️  Warning: Package exceeds 50MB uncompressed limit"
+          fi
       
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -515,13 +594,13 @@ deploy-warp:
         run: |
           aws lambda wait function-updated \
             --function-name ${{ secrets.AWS_LAMBDA_TRAIN_FUNCTION_NAME }}
-
+      
       - name: Update Lambda configuration
         run: |
           aws lambda update-function-configuration \
             --function-name ${{ secrets.AWS_LAMBDA_TRAIN_FUNCTION_NAME }} \
             --timeout 900 \
-            --memory-size 2048 \
+            --memory-size 3000 \
             --environment "Variables={
               DATABASE_URL=${{ secrets.DATABASE_URL }},
               BUCKET_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }},
@@ -529,7 +608,16 @@ deploy-warp:
               BUCKET_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }},
               BUCKET_NAME=${{ secrets.AWS_BUCKET_NAME }},
               BUCKET_REGION=${{ secrets.AWS_REGION }},
-              MODEL_OUTPUT_PATH=/tmp/models
+              OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }},
+              WARP_KEY=${{ secrets.WARP_KEY }},
+              SMTP_HOST=${{ secrets.SMTP_HOST }},
+              SMTP_PORT=${{ secrets.SMTP_PORT }},
+              SMTP_USERNAME=${{ secrets.SMTP_USERNAME }},
+              SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }},
+              SMTP_FROM_EMAIL=${{ secrets.SMTP_FROM_EMAIL }},
+              SMTP_FROM_NAME=${{ secrets.SMTP_FROM_NAME }},
+              ADMIN_URL=${{ secrets.ADMIN_URL }},
+              WARP_URL=${{ secrets.WARP_URL }}
             }"
       
       - name: Get Function URL
@@ -577,6 +665,16 @@ deploy-warp:
           find . -type f -name "*.pyo" -delete
           zip -r9 ../deployment-package.zip . -x "*.git*" "*.pyc" "*__pycache__*"
       
+      - name: Check package size
+        working-directory: ./ocr
+        run: |
+          SIZE=$(du -h deployment-package.zip | cut -f1)
+          echo "📦 Package size: $SIZE"
+          SIZE_BYTES=$(stat -f%z deployment-package.zip 2>/dev/null || stat -c%s deployment-package.zip)
+          if [ $SIZE_BYTES -gt 52428800 ]; then
+            echo "⚠️  Warning: Package exceeds 50MB uncompressed limit"
+          fi
+      
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -595,20 +693,30 @@ deploy-warp:
         run: |
           aws lambda wait function-updated \
             --function-name ${{ secrets.AWS_LAMBDA_OCR_FUNCTION_NAME }}
-
+      
       - name: Update Lambda configuration
         run: |
           aws lambda update-function-configuration \
             --function-name ${{ secrets.AWS_LAMBDA_OCR_FUNCTION_NAME }} \
-            --timeout 300 \
-            --memory-size 512 \
+            --timeout 900 \
+            --memory-size 3000 \
             --environment "Variables={
               DATABASE_URL=${{ secrets.DATABASE_URL }},
               BUCKET_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }},
               BUCKET_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }},
               BUCKET_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }},
               BUCKET_NAME=${{ secrets.AWS_BUCKET_NAME }},
-              BUCKET_REGION=${{ secrets.AWS_REGION }}
+              BUCKET_REGION=${{ secrets.AWS_REGION }},
+              OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }},
+              WARP_KEY=${{ secrets.WARP_KEY }},
+              SMTP_HOST=${{ secrets.SMTP_HOST }},
+              SMTP_PORT=${{ secrets.SMTP_PORT }},
+              SMTP_USERNAME=${{ secrets.SMTP_USERNAME }},
+              SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }},
+              SMTP_FROM_EMAIL=${{ secrets.SMTP_FROM_EMAIL }},
+              SMTP_FROM_NAME=${{ secrets.SMTP_FROM_NAME }},
+              ADMIN_URL=${{ secrets.ADMIN_URL }},
+              WARP_URL=${{ secrets.WARP_URL }}
             }"
       
       - name: Get Function URL
@@ -661,42 +769,11 @@ deploy-warp:
       - name: Create deployment package
         working-directory: ./predict/package
         run: |
-          zip -r ../deployment-package.zip .
+          find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+          find . -type d -name "*.dist-info" -exec rm -rf {} + 2>/dev/null || true
+          find . -type d -name "tests" -exec rm -rf {} + 2>/dev/null || true
+          find . -type f -name "*.pyc" -delete
+          find . -type f -name "*.pyo" -delete
+          zip -r9 ../deployment-package.zip . -x "*.git*" "*.pyc" "*__pycache__*"
       
-      - name: Deploy to AWS Lambda
-        working-directory: ./predict
-        run: |
-          aws lambda update-function-code \
-            --function-name ${{ secrets.AWS_LAMBDA_PREDICT_FUNCTION_NAME }} \
-            --zip-file fileb://deployment-package.zip
-      
-      - name: Wait for Lambda update to complete
-        run: |
-          aws lambda wait function-updated \
-            --function-name ${{ secrets.AWS_LAMBDA_PREDICT_FUNCTION_NAME }}
-
-      - name: Update Lambda environment variables
-        run: |
-          aws lambda update-function-configuration \
-            --function-name ${{ secrets.AWS_LAMBDA_PREDICT_FUNCTION_NAME }} \
-            --environment "Variables={
-              MODEL_PATH=/var/task/lightgbm_model.txt,
-              BUCKET_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }},
-              BUCKET_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }},
-              BUCKET_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }},
-              BUCKET_NAME=${{ secrets.AWS_BUCKET_NAME }},
-              BUCKET_REGION=${{ secrets.AWS_REGION }},
-              OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }},
-              WARP_KEY=${{ secrets.WARP_KEY }},
-              SMTP_USERNAME=${{ secrets.SMTP_USERNAME }},
-              SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }},
-              SMTP_FROM_EMAIL=${{ secrets.SMTP_FROM_EMAIL }}
-            }"
-
-      - name: Get Function URL
-        run: |
-          FUNCTION_URL=$(aws lambda get-function-url-config \
-            --function-name ${{ secrets.AWS_LAMBDA_PREDICT_FUNCTION_NAME }} \
-            --query 'FunctionUrl' \
-            --output text 2>/dev/null || echo "No Function URL configured")
-          echo "PREDICT Lambda Function URL: $FUNCTION_URL"
+      - name:
