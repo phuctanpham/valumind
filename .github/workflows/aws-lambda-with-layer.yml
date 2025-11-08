@@ -47,8 +47,8 @@ jobs:
             exit 1
           fi
           
-          [ -f "lambda_handler.py" ] && cp lambda_handler.py ./package/ || true
-      
+          [ -f "lambda_handler.py" ] && cp lambda_handler.py ./package/ || true    
+     
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
