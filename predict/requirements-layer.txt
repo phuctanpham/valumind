@@ -1,6 +1,6 @@
-scikit-learn
 pandas
 lightgbm
-shap
-matplotlib
 geopy
+
+matplotlib
+scikit-learn

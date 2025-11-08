@@ -1,2 +1,1 @@
 boto3==1.29.7
-opencv-python-headless==4.8.1.78
