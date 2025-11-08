@@ -32,12 +32,12 @@ jobs:
         id: build-dir
         working-directory: ${{ inputs.working-directory }}
         run: |
-          if [ -d "dist" ]; then
+          if [ -d "out" ]; then
+            echo "dir=out" >> $GITHUB_OUTPUT
+          elif [ -d "dist" ]; then
             echo "dir=dist" >> $GITHUB_OUTPUT
           elif [ -d "build" ]; then
             echo "dir=build" >> $GITHUB_OUTPUT
-          elif [ -d "out" ]; then
-            echo "dir=out" >> $GITHUB_OUTPUT
           else
             echo "❌ No build output found"
             ls -la

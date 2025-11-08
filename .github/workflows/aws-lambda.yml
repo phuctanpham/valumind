@@ -65,27 +65,19 @@ jobs:
         working-directory: ${{ inputs.working-directory }}
         run: |
           FUNCTION_NAME="AWS_LAMBDA_${{ inputs.function-name }}_FUNCTION_NAME"
-          FUNCTION_NAME="${FUNCTION_NAME^^}"
+          FUNCTION_NAME=$(echo "${FUNCTION_NAME}" | tr '[:lower:]' '[:upper:]' | tr '-' '_')
           aws lambda update-function-code \
-            --function-name ${{ secrets[env.FUNCTION_NAME] }} \
+            --function-name "${{ secrets[format('AWS_LAMBDA_{0}_FUNCTION_NAME', inputs.function-name)] }}" \
             --zip-file fileb://deployment-package.zip
-        env:
-          FUNCTION_NAME: AWS_LAMBDA_${{ inputs.function-name }}_FUNCTION_NAME
       
       - name: Wait for update
         run: |
-          FUNCTION_NAME="AWS_LAMBDA_${{ inputs.function-name }}_FUNCTION_NAME"
-          FUNCTION_NAME="${FUNCTION_NAME^^}"
-          aws lambda wait function-updated --function-name ${{ secrets[env.FUNCTION_NAME] }}
-        env:
-          FUNCTION_NAME: AWS_LAMBDA_${{ inputs.function-name }}_FUNCTION_NAME
+          aws lambda wait function-updated --function-name "${{ secrets[format('AWS_LAMBDA_{0}_FUNCTION_NAME', inputs.function-name)] }}"
       
       - name: Update configuration
         run: |
-          FUNCTION_NAME="AWS_LAMBDA_${{ inputs.function-name }}_FUNCTION_NAME"
-          FUNCTION_NAME="${FUNCTION_NAME^^}"
           aws lambda update-function-configuration \
-            --function-name ${{ secrets[env.FUNCTION_NAME] }} \
+            --function-name "${{ secrets[format('AWS_LAMBDA_{0}_FUNCTION_NAME', inputs.function-name)] }}" \
             --timeout 900 \
             --memory-size 3000 \
             --environment "Variables={
@@ -110,12 +102,8 @@ jobs:
       
       - name: Get Function URL
         run: |
-          FUNCTION_NAME="AWS_LAMBDA_${{ inputs.function-name }}_FUNCTION_NAME"
-          FUNCTION_NAME="${FUNCTION_NAME^^}"
           FUNCTION_URL=$(aws lambda get-function-url-config \
-            --function-name ${{ secrets[env.FUNCTION_NAME] }} \
+            --function-name "${{ secrets[format('AWS_LAMBDA_{0}_FUNCTION_NAME', inputs.function-name)] }}" \
             --query 'FunctionUrl' \
             --output text 2>/dev/null || echo "No Function URL configured")
           echo "🔗 Function URL: $FUNCTION_URL"
-        env:
-          FUNCTION_NAME: AWS_LAMBDA_${{ inputs.function-name }}_FUNCTION_NAME
