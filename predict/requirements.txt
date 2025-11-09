@@ -1,2 +1,5 @@
 shap
 tabulate
+cloudpickle
+packaging
+slicer

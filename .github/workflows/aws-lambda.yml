@@ -24,19 +24,6 @@ jobs:
         with:
           python-version: '3.11'
       
-      - name: Install dependencies
-        shell: bash
-        working-directory: ${{ inputs.working-directory }}
-        run: |
-          rm -rf ./package
-          mkdir -p ./package
-          python -m pip install --upgrade pip
-          pip install --platform manylinux2014_x86_64 --only-binary=:all: -r requirements.txt -t ./package
-          cp -r src ./package/
-          if [ -f "lambda_handler.py" ]; then
-            cp lambda_handler.py ./package/
-          fi
-      
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -44,65 +31,60 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
       
-      - name: Download model from S3
+      - name: Build app package
+        working-directory: ${{ inputs.working-directory }}
+        run: |
+          rm -rf ./package
+          mkdir -p ./package
+          python -m pip install --upgrade pip
+          pip install --platform manylinux2014_x86_64 --only-binary=:all: -r requirements.txt -t ./package
+          [ -d "src" ] && cp -r src ./package/
+          [ -f "lambda_handler.py" ] && cp lambda_handler.py ./package/
+      
+      - name: Download model
         if: inputs.download-model
         working-directory: ${{ inputs.working-directory }}/package
         run: |
-          aws s3 cp s3://${{ secrets.AWS_BUCKET_NAME }}/model_artifacts/lightgbm_model.txt ./lightgbm_model.txt
+          aws s3 cp s3://${{ secrets.AWS_BUCKET_NAME }}/model_artifacts/lightgbm_model.txt ./
       
       - name: Create deployment package
         working-directory: ${{ inputs.working-directory }}/package
         run: |
           find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
           find . -type d -name "*.dist-info" -exec rm -rf {} + 2>/dev/null || true
-          find . -type d -name "tests" -exec rm -rf {} + 2>/dev/null || true
           find . -type f -name "*.pyc" -delete
-          find . -type f -name "*.pyo" -delete
-          zip -r9 ../deployment-package.zip . -x "*.git*" "*.pyc" "*__pycache__*"
+          zip -r9 ../deployment.zip .
       
-      - name: Check package size
+      - name: Check size
         working-directory: ${{ inputs.working-directory }}
         run: |
-          SIZE=$(du -h deployment-package.zip | cut -f1)
-          echo "📦 Package size: $SIZE"
-          SIZE_BYTES=$(stat -c%s deployment-package.zip)
-          if [ $SIZE_BYTES -gt 52428800 ]; then
-            echo "⚠️  Warning: Package exceeds 50MB limit"
-          fi
+          SIZE_BYTES=$(stat -c%s deployment.zip)
+          SIZE_MB=$((SIZE_BYTES / 1024 / 1024))
+          echo "📦 Package: ${SIZE_MB}MB"
       
-      - name: Deploy to AWS Lambda
+      - name: Upload to S3
         working-directory: ${{ inputs.working-directory }}
         run: |
+          FUNC="${{ inputs.function-name }}"
+          aws s3 cp deployment.zip s3://${{ secrets.AWS_BUCKET_NAME }}/deployments/${FUNC}.zip
+      
+      - name: Update function code
+        run: |
+          FUNC="${{ secrets[format('AWS_LAMBDA_{0}_FUNCTION_NAME', inputs.function-name)] }}"
+          
           aws lambda update-function-code \
-            --function-name "${{ secrets[format('AWS_LAMBDA_{0}_FUNCTION_NAME', inputs.function-name)] }}" \
-            --zip-file fileb://deployment-package.zip
+            --function-name "$FUNC" \
+            --s3-bucket ${{ secrets.AWS_BUCKET_NAME }} \
+            --s3-key deployments/${{ inputs.function-name }}.zip
+          
+          aws lambda wait function-updated --function-name "$FUNC"
       
-      - name: Wait for update
+      - name: Update function config
         run: |
-          aws lambda wait function-updated --function-name "${{ secrets[format('AWS_LAMBDA_{0}_FUNCTION_NAME', inputs.function-name)] }}"
-      
-      - name: Update configuration
-        run: |
+          FUNC="${{ secrets[format('AWS_LAMBDA_{0}_FUNCTION_NAME', inputs.function-name)] }}"
+          
           aws lambda update-function-configuration \
-            --function-name "${{ secrets[format('AWS_LAMBDA_{0}_FUNCTION_NAME', inputs.function-name)] }}" \
+            --function-name "$FUNC" \
             --timeout 900 \
-            --memory-size 3000 \
-            --environment "Variables={
-              MODEL_PATH=/var/task/lightgbm_model.txt,
-              DATABASE_URL=${{ secrets.DATABASE_URL }},
-              BUCKET_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }},
-              BUCKET_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }},
-              BUCKET_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }},
-              BUCKET_NAME=${{ secrets.AWS_BUCKET_NAME }},
-              BUCKET_REGION=${{ secrets.AWS_REGION }},
-              OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }},
-              WARP_KEY=${{ secrets.WARP_KEY }},
-              SMTP_HOST=${{ secrets.SMTP_HOST }},
-              SMTP_PORT=${{ secrets.SMTP_PORT }},
-              SMTP_USERNAME=${{ secrets.SMTP_USERNAME }},
-              SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }},
-              SMTP_FROM_EMAIL=${{ secrets.SMTP_FROM_EMAIL }},
-              SMTP_FROM_NAME=${{ secrets.SMTP_FROM_NAME }},
-              ADMIN_URL=${{ secrets.ADMIN_URL }},
-              WARP_URL=${{ secrets.WARP_URL }}
-            }"
+            --memory-size 3008 \
+            --environment "Variables={MODEL_PATH=/var/task/lightgbm_model.txt,DATABASE_URL=${{ secrets.DATABASE_URL }},BUCKET_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }},BUCKET_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }},BUCKET_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }},BUCKET_NAME=${{ secrets.AWS_BUCKET_NAME }},BUCKET_REGION=${{ secrets.AWS_REGION }},OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }},WARP_KEY=${{ secrets.WARP_KEY }},SMTP_HOST=${{ secrets.SMTP_HOST }},SMTP_PORT=${{ secrets.SMTP_PORT }},SMTP_USERNAME=${{ secrets.SMTP_USERNAME }},SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }},SMTP_FROM_EMAIL=${{ secrets.SMTP_FROM_EMAIL }},SMTP_FROM_NAME=${{ secrets.SMTP_FROM_NAME }},ADMIN_URL=${{ secrets.ADMIN_URL }},WARP_URL=${{ secrets.WARP_URL }}}"
