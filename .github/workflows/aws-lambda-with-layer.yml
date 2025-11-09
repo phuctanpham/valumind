@@ -38,6 +38,7 @@ jobs:
           ML1=$(aws lambda list-layer-versions --layer-name ml1 --query 'LayerVersions[0].LayerVersionArn' --output text)
           ML2=$(aws lambda list-layer-versions --layer-name ml2 --query 'LayerVersions[0].LayerVersionArn' --output text)
           ML3=$(aws lambda list-layer-versions --layer-name ml3 --query 'LayerVersions[0].LayerVersionArn' --output text)
+          ML4=$(aws lambda list-layer-versions --layer-name ml4 --query 'LayerVersions[0].LayerVersionArn' --output text)
           OCR1=$(aws lambda list-layer-versions --layer-name ocr1 --query 'LayerVersions[0].LayerVersionArn' --output text)
           OCR2=$(aws lambda list-layer-versions --layer-name ocr2 --query 'LayerVersions[0].LayerVersionArn' --output text)
           OCR3=$(aws lambda list-layer-versions --layer-name ocr3 --query 'LayerVersions[0].LayerVersionArn' --output text)
@@ -46,6 +47,7 @@ jobs:
           echo "ML1_LAYER=$ML1" >> $GITHUB_ENV
           echo "ML2_LAYER=$ML2" >> $GITHUB_ENV
           echo "ML3_LAYER=$ML3" >> $GITHUB_ENV
+          echo "ML4_LAYER=$ML4" >> $GITHUB_ENV
           echo "OCR1_LAYER=$OCR1" >> $GITHUB_ENV
           echo "OCR2_LAYER=$OCR2" >> $GITHUB_ENV
           echo "OCR3_LAYER=$OCR3" >> $GITHUB_ENV
@@ -108,7 +110,7 @@ jobs:
           FUNC_NAME="${{ inputs.function-name }}"
           
           if [[ "$FUNC_NAME" == "predict" ]] || [[ "$FUNC_NAME" == "train" ]]; then
-            LAYERS="$SHARED_LAYER $ML1_LAYER $ML2_LAYER $ML3_LAYER"
+            LAYERS="$SHARED_LAYER $ML1_LAYER $ML2_LAYER $ML3_LAYER $ML4_LAYER"
           elif [[ "$FUNC_NAME" == "warp" ]] || [[ "$FUNC_NAME" == "cron" ]] || [[ "$FUNC_NAME" == "ocr" ]]; then
             LAYERS="$SHARED_LAYER $OCR1_LAYER $OCR2_LAYER $OCR3_LAYER"
           else
@@ -120,8 +122,14 @@ jobs:
       
       - name: Update function code
         run: |
-          FUNC_NAME_UPPER=$(echo "${{ inputs.function-name }}" | tr '[:lower:]' '[:upper:]')
-          FUNC="${{ secrets[format('AWS_LAMBDA_{0}_FUNCTION_NAME', '$FUNC_NAME_UPPER')] }}"
+          FUNC_NAME="${{ inputs.function-name }}"
+          case "$FUNC_NAME" in
+            "predict") FUNC="${{ secrets.AWS_LAMBDA_PREDICT_FUNCTION_NAME }}" ;;
+            "train") FUNC="${{ secrets.AWS_LAMBDA_TRAIN_FUNCTION_NAME }}" ;;
+            "warp") FUNC="${{ secrets.AWS_LAMBDA_WARP_FUNCTION_NAME }}" ;;
+            "cron") FUNC="${{ secrets.AWS_LAMBDA_CRON_FUNCTION_NAME }}" ;;
+            "ocr") FUNC="${{ secrets.AWS_LAMBDA_OCR_FUNCTION_NAME }}" ;;
+          esac
           
           aws lambda update-function-code \
             --function-name "$FUNC" \
@@ -132,7 +140,8 @@ jobs:
       
       - name: Update function config
         run: |
-          FUNC="${{ secrets[format('AWS_LAMBDA_{0}_FUNCTION_NAME', inputs.function-name)] }}"
+          FUNC_NAME_UPPER=$(echo "${{ inputs.function-name }}" | tr '[:lower:]' '[:upper:]')
+          FUNC="${{ secrets[format('AWS_LAMBDA_{0}_FUNCTION_NAME', '$FUNC_NAME_UPPER')] }}"
           
           aws lambda update-function-configuration \
             --function-name "$FUNC" \

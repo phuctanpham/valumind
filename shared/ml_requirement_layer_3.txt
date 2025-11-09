@@ -2,8 +2,3 @@
 matplotlib
 geopy
 joblib
-shap
-tabulate
-cloudpickle
-packaging
-slicer

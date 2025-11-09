@@ -13,6 +13,7 @@ jobs:
       ml1: ${{ steps.changes.outputs.ml1 }}
       ml2: ${{ steps.changes.outputs.ml2 }}
       ml3: ${{ steps.changes.outputs.ml3 }}
+      ml4: ${{ steps.changes.outputs.ml4 }}
       ocr1: ${{ steps.changes.outputs.ocr1 }}
       ocr2: ${{ steps.changes.outputs.ocr2 }}
       ocr3: ${{ steps.changes.outputs.ocr3 }}
@@ -29,6 +30,7 @@ jobs:
             echo "ml1=true" >> $GITHUB_OUTPUT
             echo "ml2=true" >> $GITHUB_OUTPUT
             echo "ml3=true" >> $GITHUB_OUTPUT
+            echo "ml4=true" >> $GITHUB_OUTPUT
             echo "ocr1=true" >> $GITHUB_OUTPUT
             echo "ocr2=true" >> $GITHUB_OUTPUT
             echo "ocr3=true" >> $GITHUB_OUTPUT
@@ -37,6 +39,7 @@ jobs:
             git diff --name-only HEAD~1 HEAD | grep -q "shared/ml_requirement_layer_1.txt" && echo "ml1=true" >> $GITHUB_OUTPUT || echo "ml1=false" >> $GITHUB_OUTPUT
             git diff --name-only HEAD~1 HEAD | grep -q "shared/ml_requirement_layer_2.txt" && echo "ml2=true" >> $GITHUB_OUTPUT || echo "ml2=false" >> $GITHUB_OUTPUT
             git diff --name-only HEAD~1 HEAD | grep -q "shared/ml_requirement_layer_3.txt" && echo "ml3=true" >> $GITHUB_OUTPUT || echo "ml3=false" >> $GITHUB_OUTPUT
+            git diff --name-only HEAD~1 HEAD | grep -q "shared/ml_requirement_layer_4.txt" && echo "ml4=true" >> $GITHUB_OUTPUT || echo "ml4=false" >> $GITHUB_OUTPUT
             git diff --name-only HEAD~1 HEAD | grep -q "shared/ocr_requirement_layer_1.txt" && echo "ocr1=true" >> $GITHUB_OUTPUT || echo "ocr1=false" >> $GITHUB_OUTPUT
             git diff --name-only HEAD~1 HEAD | grep -q "shared/ocr_requirement_layer_2.txt" && echo "ocr2=true" >> $GITHUB_OUTPUT || echo "ocr2=false" >> $GITHUB_OUTPUT
             git diff --name-only HEAD~1 HEAD | grep -q "shared/ocr_requirement_layer_3.txt" && echo "ocr3=true" >> $GITHUB_OUTPUT || echo "ocr3=false" >> $GITHUB_OUTPUT
@@ -127,7 +130,6 @@ jobs:
           pip install --platform manylinux2014_x86_64 --only-binary=:all: \
             -r shared/ml_requirement_layer_2.txt -t layer/python
           
-          # Remove unnecessary files
           find layer/python -type d -name "tests" -exec rm -rf {} + 2>/dev/null || true
           find layer/python -type d -name "*.dist-info" -exec rm -rf {} + 2>/dev/null || true
           find layer/python -type f -name "*.pyc" -delete
@@ -135,14 +137,6 @@ jobs:
           
           cd layer
           zip -r9 ../layer.zip . -x "*.pyc" "*__pycache__*" "*.dist-info/*"
-      
-      - name: Check layer size
-        run: |
-          SIZE_BYTES=$(stat -c%s layer.zip)
-          SIZE_MB=$((SIZE_BYTES / 1024 / 1024))
-          echo "📦 ML2 Layer size: ${SIZE_MB}MB (${SIZE_BYTES} bytes)"
-          ls -lh layer.zip
-          du -sh layer/python
       
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -153,13 +147,13 @@ jobs:
       
       - name: Upload to S3
         run: |
-          aws s3 cp layer.zip s3://${{ secrets.AWS_BUCKET_NAME }}/layers/${{ secrets.AWS_LAMBDA_ML2_LAYER_FUNCTION_NAME }}.zip
+          aws s3 cp layer.zip s3://${{ secrets.AWS_BUCKET_NAME }}/layers/ml2.zip
 
       - name: Publish layer
         run: |
           LAYER_ARN=$(aws lambda publish-layer-version \
-            --layer-name "${{ secrets.AWS_LAMBDA_ML2_LAYER_FUNCTION_NAME }}" \
-            --content S3Bucket=${{ secrets.AWS_BUCKET_NAME }},S3Key=layers/${{ secrets.AWS_LAMBDA_ML2_LAYER_FUNCTION_NAME }}.zip \
+            --layer-name ml2 \
+            --content S3Bucket=${{ secrets.AWS_BUCKET_NAME }},S3Key=layers/ml2.zip \
             --compatible-runtimes python3.11 \
             --query 'LayerVersionArn' --output text)
           echo "✅ Published: $LAYER_ARN"
@@ -194,6 +188,50 @@ jobs:
           LAYER_ARN=$(aws lambda publish-layer-version \
             --layer-name ml3 \
             --zip-file fileb://layer.zip \
+            --compatible-runtimes python3.11 \
+            --query 'LayerVersionArn' --output text)
+          echo "✅ Published: $LAYER_ARN"
+
+  deploy-ml4-layer:
+    needs: detect-layer-changes
+    if: needs.detect-layer-changes.outputs.ml4 == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Build layer
+        run: |
+          mkdir -p layer/python
+          pip install --platform manylinux2014_x86_64 --only-binary=:all: \
+            -r shared/ml_requirement_layer_4.txt -t layer/python
+          
+          find layer/python -type d -name "tests" -exec rm -rf {} + 2>/dev/null || true
+          find layer/python -type d -name "*.dist-info" -exec rm -rf {} + 2>/dev/null || true
+          find layer/python -type f -name "*.pyc" -delete
+          find layer/python -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+          
+          cd layer
+          zip -r9 ../layer.zip . -x "*.pyc" "*__pycache__*" "*.dist-info/*"
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      
+      - name: Upload to S3
+        run: |
+          aws s3 cp layer.zip s3://${{ secrets.AWS_BUCKET_NAME }}/layers/ml4.zip
+
+      - name: Publish layer
+        run: |
+          LAYER_ARN=$(aws lambda publish-layer-version \
+            --layer-name ml4 \
+            --content S3Bucket=${{ secrets.AWS_BUCKET_NAME }},S3Key=layers/ml4.zip \
             --compatible-runtimes python3.11 \
             --query 'LayerVersionArn' --output text)
           echo "✅ Published: $LAYER_ARN"
@@ -248,7 +286,6 @@ jobs:
           pip install --platform manylinux2014_x86_64 --only-binary=:all: \
             -r shared/ocr_requirement_layer_2.txt -t layer/python
           
-          # Remove unnecessary files
           find layer/python -type d -name "tests" -exec rm -rf {} + 2>/dev/null || true
           find layer/python -type d -name "*.dist-info" -exec rm -rf {} + 2>/dev/null || true
           find layer/python -type f -name "*.pyc" -delete
@@ -256,14 +293,6 @@ jobs:
           
           cd layer
           zip -r9 ../layer.zip . -x "*.pyc" "*__pycache__*" "*.dist-info/*"
-      
-      - name: Check layer size
-        run: |
-          SIZE_BYTES=$(stat -c%s layer.zip)
-          SIZE_MB=$((SIZE_BYTES / 1024 / 1024))
-          echo "📦 OCR2 Layer size: ${SIZE_MB}MB (${SIZE_BYTES} bytes)"
-          ls -lh layer.zip
-          du -sh layer/python
       
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -274,13 +303,13 @@ jobs:
       
       - name: Upload to S3
         run: |
-          aws s3 cp layer.zip s3://${{ secrets.AWS_BUCKET_NAME }}/layers/${{ secrets.AWS_LAMBDA_OCR2_LAYER_FUNCTION_NAME }}.zip
+          aws s3 cp layer.zip s3://${{ secrets.AWS_BUCKET_NAME }}/layers/ocr2.zip
 
       - name: Publish layer
         run: |
           LAYER_ARN=$(aws lambda publish-layer-version \
-            --layer-name "${{ secrets.AWS_LAMBDA_OCR2_LAYER_FUNCTION_NAME }}" \
-            --content S3Bucket=${{ secrets.AWS_BUCKET_NAME }},S3Key=layers/${{ secrets.AWS_LAMBDA_OCR2_LAYER_FUNCTION_NAME }}.zip \
+            --layer-name ocr2 \
+            --content S3Bucket=${{ secrets.AWS_BUCKET_NAME }},S3Key=layers/ocr2.zip \
             --compatible-runtimes python3.11 \
             --query 'LayerVersionArn' --output text)
           echo "✅ Published: $LAYER_ARN"
@@ -301,7 +330,6 @@ jobs:
           pip install --platform manylinux2014_x86_64 --only-binary=:all: \
             -r shared/ocr_requirement_layer_3.txt -t layer/python
           
-          # Remove unnecessary files  
           find layer/python -type d -name "tests" -exec rm -rf {} + 2>/dev/null || true
           find layer/python -type d -name "*.dist-info" -exec rm -rf {} + 2>/dev/null || true
           find layer/python -type f -name "*.pyc" -delete
