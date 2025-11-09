@@ -237,6 +237,50 @@ jobs:
             --query 'LayerVersionArn' --output text)
           echo "✅ Published: $LAYER_ARN"
 
+  deploy-ml5-layer:
+    needs: detect-layer-changes
+    if: needs.detect-layer-changes.outputs.ml5 == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Build layer
+        run: |
+          mkdir -p layer/python
+          pip install --platform manylinux2014_x86_64 --only-binary=:all: \
+            -r shared/ml_requirement_layer_4.txt -t layer/python
+          
+          find layer/python -type d -name "tests" -exec rm -rf {} + 2>/dev/null || true
+          find layer/python -type d -name "*.dist-info" -exec rm -rf {} + 2>/dev/null || true
+          find layer/python -type f -name "*.pyc" -delete
+          find layer/python -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+          
+          cd layer
+          zip -r9 ../layer.zip . -x "*.pyc" "*__pycache__*" "*.dist-info/*"
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      
+      - name: Upload to S3
+        run: |
+          aws s3 cp layer.zip s3://${{ secrets.AWS_BUCKET_NAME }}/layers/ml5.zip
+
+      - name: Publish layer
+        run: |
+          LAYER_ARN=$(aws lambda publish-layer-version \
+            --layer-name ml5 \
+            --content S3Bucket=${{ secrets.AWS_BUCKET_NAME }},S3Key=layers/ml5.zip \
+            --compatible-runtimes python3.11 \
+            --query 'LayerVersionArn' --output text)
+          echo "✅ Published: $LAYER_ARN"
+
   deploy-ocr1-layer:
     needs: detect-layer-changes
     if: needs.detect-layer-changes.outputs.ocr1 == 'true'
