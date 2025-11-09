@@ -39,6 +39,7 @@ jobs:
           ML2=$(aws lambda list-layer-versions --layer-name ml2 --query 'LayerVersions[0].LayerVersionArn' --output text)
           ML3=$(aws lambda list-layer-versions --layer-name ml3 --query 'LayerVersions[0].LayerVersionArn' --output text)
           ML4=$(aws lambda list-layer-versions --layer-name ml4 --query 'LayerVersions[0].LayerVersionArn' --output text)
+          ML5=$(aws lambda list-layer-versions --layer-name ml5 --query 'LayerVersions[0].LayerVersionArn' --output text)
           OCR1=$(aws lambda list-layer-versions --layer-name ocr1 --query 'LayerVersions[0].LayerVersionArn' --output text)
           OCR2=$(aws lambda list-layer-versions --layer-name ocr2 --query 'LayerVersions[0].LayerVersionArn' --output text)
           OCR3=$(aws lambda list-layer-versions --layer-name ocr3 --query 'LayerVersions[0].LayerVersionArn' --output text)
@@ -48,6 +49,7 @@ jobs:
           echo "ML2_LAYER=$ML2" >> $GITHUB_ENV
           echo "ML3_LAYER=$ML3" >> $GITHUB_ENV
           echo "ML4_LAYER=$ML4" >> $GITHUB_ENV
+          echo "ML5_LAYER=$ML5" >> $GITHUB_ENV
           echo "OCR1_LAYER=$OCR1" >> $GITHUB_ENV
           echo "OCR2_LAYER=$OCR2" >> $GITHUB_ENV
           echo "OCR3_LAYER=$OCR3" >> $GITHUB_ENV
@@ -109,8 +111,10 @@ jobs:
         run: |
           FUNC_NAME="${{ inputs.function-name }}"
           
-          if [[ "$FUNC_NAME" == "predict" ]] || [[ "$FUNC_NAME" == "train" ]]; then
-            LAYERS="$SHARED_LAYER $ML1_LAYER $ML2_LAYER $ML3_LAYER $ML4_LAYER"
+          if [[ "$FUNC_NAME" == "predict" ]]; then
+            LAYERS="$SHARED_LAYER $ML1_LAYER $ML2_LAYER $ML3_LAYER $ML4_LAYER $ML5_LAYER"
+          elif [[ "$FUNC_NAME" == "train" ]]; then
+            LAYERS="$SHARED_LAYER $ML1_LAYER $ML2_LAYER $ML3_LAYER $ML4_LAYER $ML5_LAYER"
           elif [[ "$FUNC_NAME" == "warp" ]] || [[ "$FUNC_NAME" == "cron" ]] || [[ "$FUNC_NAME" == "ocr" ]]; then
             LAYERS="$SHARED_LAYER $OCR1_LAYER $OCR2_LAYER $OCR3_LAYER"
           else

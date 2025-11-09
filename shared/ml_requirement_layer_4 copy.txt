@@ -1,5 +1,4 @@
-# layer for predict and train
-shap
+# layer for predict only
 tabulate
 cloudpickle
 packaging
