@@ -18,6 +18,7 @@ jobs:
       ocr1: ${{ steps.changes.outputs.ocr1 }}
       ocr2: ${{ steps.changes.outputs.ocr2 }}
       ocr3: ${{ steps.changes.outputs.ocr3 }}
+    
     steps:
       - uses: actions/checkout@v4
         with:
@@ -32,6 +33,7 @@ jobs:
             echo "ml2=true" >> $GITHUB_OUTPUT
             echo "ml3=true" >> $GITHUB_OUTPUT
             echo "ml4=true" >> $GITHUB_OUTPUT
+            echo "ml5=true" >> $GITHUB_OUTPUT
             echo "ocr1=true" >> $GITHUB_OUTPUT
             echo "ocr2=true" >> $GITHUB_OUTPUT
             echo "ocr3=true" >> $GITHUB_OUTPUT
@@ -41,6 +43,7 @@ jobs:
             git diff --name-only HEAD~1 HEAD | grep -q "shared/ml_requirement_layer_2.txt" && echo "ml2=true" >> $GITHUB_OUTPUT || echo "ml2=false" >> $GITHUB_OUTPUT
             git diff --name-only HEAD~1 HEAD | grep -q "shared/ml_requirement_layer_3.txt" && echo "ml3=true" >> $GITHUB_OUTPUT || echo "ml3=false" >> $GITHUB_OUTPUT
             git diff --name-only HEAD~1 HEAD | grep -q "shared/ml_requirement_layer_4.txt" && echo "ml4=true" >> $GITHUB_OUTPUT || echo "ml4=false" >> $GITHUB_OUTPUT
+            git diff --name-only HEAD~1 HEAD | grep -q "shared/ml_requirement_layer_5.txt" && echo "ml5=true" >> $GITHUB_OUTPUT || echo "ml5=false" >> $GITHUB_OUTPUT
             git diff --name-only HEAD~1 HEAD | grep -q "shared/ocr_requirement_layer_1.txt" && echo "ocr1=true" >> $GITHUB_OUTPUT || echo "ocr1=false" >> $GITHUB_OUTPUT
             git diff --name-only HEAD~1 HEAD | grep -q "shared/ocr_requirement_layer_2.txt" && echo "ocr2=true" >> $GITHUB_OUTPUT || echo "ocr2=false" >> $GITHUB_OUTPUT
             git diff --name-only HEAD~1 HEAD | grep -q "shared/ocr_requirement_layer_3.txt" && echo "ocr3=true" >> $GITHUB_OUTPUT || echo "ocr3=false" >> $GITHUB_OUTPUT
@@ -251,7 +254,7 @@ jobs:
         run: |
           mkdir -p layer/python
           pip install --platform manylinux2014_x86_64 --only-binary=:all: \
-            -r shared/ml_requirement_layer_4.txt -t layer/python
+            -r shared/ml_requirement_layer_5.txt -t layer/python
           
           find layer/python -type d -name "tests" -exec rm -rf {} + 2>/dev/null || true
           find layer/python -type d -name "*.dist-info" -exec rm -rf {} + 2>/dev/null || true
