@@ -8,29 +8,66 @@ on:
   workflow_dispatch:
 
 jobs:
+
   detect-layer-changes:
     runs-on: ubuntu-latest
     outputs:
-      shared: ${{ steps.filter.outputs.shared }}
-      ml1: ${{ steps.filter.outputs.ml1 }}
-      ml2: ${{ steps.filter.outputs.ml2 }}
-      ml3: ${{ steps.filter.outputs.ml3 }}
-      ocr1: ${{ steps.filter.outputs.ocr1 }}
-      ocr2: ${{ steps.filter.outputs.ocr2 }}
-      ocr3: ${{ steps.filter.outputs.ocr3 }}
+      shared: ${{ steps.changes.outputs.shared }}
+      ml1: ${{ steps.changes.outputs.ml1 }}
+      ml2: ${{ steps.changes.outputs.ml2 }}
+      ml3: ${{ steps.changes.outputs.ml3 }}
+      ocr1: ${{ steps.changes.outputs.ocr1 }}
+      ocr2: ${{ steps.changes.outputs.ocr2 }}
+      ocr3: ${{ steps.changes.outputs.ocr3 }}
     steps:
       - uses: actions/checkout@v4
-      - uses: dorny/paths-filter@v3
-        id: filter
         with:
-          filters: |
-            shared: 'shared/shared_requirement_layer.txt'
-            ml1: 'shared/ml_requirement_layer_1.txt'
-            ml2: 'shared/ml_requirement_layer_2.txt'
-            ml3: 'shared/ml_requirement_layer_3.txt'
-            ocr1: 'shared/ocr_requirement_layer_1.txt'
-            ocr2: 'shared/ocr_requirement_layer_2.txt'
-            ocr3: 'shared/ocr_requirement_layer_3.txt'
+          fetch-depth: 2
+      
+      - name: Detect changes
+        id: changes
+        run: |
+          if git diff --name-only HEAD~1 HEAD | grep -q "shared/shared_requirement_layer.txt"; then
+            echo "shared=true" >> $GITHUB_OUTPUT
+          else
+            echo "shared=false" >> $GITHUB_OUTPUT
+          fi
+          
+          if git diff --name-only HEAD~1 HEAD | grep -q "shared/ml_requirement_layer_1.txt"; then
+            echo "ml1=true" >> $GITHUB_OUTPUT
+          else
+            echo "ml1=false" >> $GITHUB_OUTPUT
+          fi
+          
+          if git diff --name-only HEAD~1 HEAD | grep -q "shared/ml_requirement_layer_2.txt"; then
+            echo "ml2=true" >> $GITHUB_OUTPUT
+          else
+            echo "ml2=false" >> $GITHUB_OUTPUT
+          fi
+          
+          if git diff --name-only HEAD~1 HEAD | grep -q "shared/ml_requirement_layer_3.txt"; then
+            echo "ml3=true" >> $GITHUB_OUTPUT
+          else
+            echo "ml3=false" >> $GITHUB_OUTPUT
+          fi
+          
+          if git diff --name-only HEAD~1 HEAD | grep -q "shared/ocr_requirement_layer_1.txt"; then
+            echo "ocr1=true" >> $GITHUB_OUTPUT
+          else
+            echo "ocr1=false" >> $GITHUB_OUTPUT
+          fi
+          
+          if git diff --name-only HEAD~1 HEAD | grep -q "shared/ocr_requirement_layer_2.txt"; then
+            echo "ocr2=true" >> $GITHUB_OUTPUT
+          else
+            echo "ocr2=false" >> $GITHUB_OUTPUT
+          fi
+          
+          if git diff --name-only HEAD~1 HEAD | grep -q "shared/ocr_requirement_layer_3.txt"; then
+            echo "ocr3=true" >> $GITHUB_OUTPUT
+          else
+            echo "ocr3=false" >> $GITHUB_OUTPUT
+          fi
 
   deploy-shared-layer:
     needs: detect-layer-changes
