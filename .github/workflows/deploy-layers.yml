@@ -130,8 +130,23 @@ jobs:
           mkdir -p layer/python
           pip install --platform manylinux2014_x86_64 --only-binary=:all: \
             -r shared/ml_requirement_layer_2.txt -t layer/python
+          
+          # Remove unnecessary files
+          find layer/python -type d -name "tests" -exec rm -rf {} + 2>/dev/null || true
+          find layer/python -type d -name "*.dist-info" -exec rm -rf {} + 2>/dev/null || true
+          find layer/python -type f -name "*.pyc" -delete
+          find layer/python -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+          
           cd layer
           zip -r9 ../layer.zip . -x "*.pyc" "*__pycache__*" "*.dist-info/*"
+      
+      - name: Check layer size
+        run: |
+          SIZE_BYTES=$(stat -c%s layer.zip)
+          SIZE_MB=$((SIZE_BYTES / 1024 / 1024))
+          echo "📦 ML2 Layer size: ${SIZE_MB}MB (${SIZE_BYTES} bytes)"
+          ls -lh layer.zip
+          du -sh layer/python
       
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -232,8 +247,23 @@ jobs:
           mkdir -p layer/python
           pip install --platform manylinux2014_x86_64 --only-binary=:all: \
             -r shared/ocr_requirement_layer_2.txt -t layer/python
+          
+          # Remove unnecessary files
+          find layer/python -type d -name "tests" -exec rm -rf {} + 2>/dev/null || true
+          find layer/python -type d -name "*.dist-info" -exec rm -rf {} + 2>/dev/null || true
+          find layer/python -type f -name "*.pyc" -delete
+          find layer/python -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+          
           cd layer
           zip -r9 ../layer.zip . -x "*.pyc" "*__pycache__*" "*.dist-info/*"
+      
+      - name: Check layer size
+        run: |
+          SIZE_BYTES=$(stat -c%s layer.zip)
+          SIZE_MB=$((SIZE_BYTES / 1024 / 1024))
+          echo "📦 OCR2 Layer size: ${SIZE_MB}MB (${SIZE_BYTES} bytes)"
+          ls -lh layer.zip
+          du -sh layer/python
       
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
