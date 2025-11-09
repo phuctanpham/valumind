@@ -20,6 +20,7 @@ jobs:
       train: ${{ steps.filter.outputs.train }}
       ocr: ${{ steps.filter.outputs.ocr }}
       predict: ${{ steps.filter.outputs.predict }}
+      shared: ${{ steps.filter.outputs.shared }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -36,6 +37,7 @@ jobs:
             train: 'train/**'
             ocr: 'ocr/**'
             predict: 'predict/**'
+            shared: 'shared/*_requirement_layer.txt'
 
   deploy-site:
     needs: detect-changes
@@ -125,3 +127,9 @@ jobs:
       function-name: predict
       working-directory: ./predict
       download-model: true
+
+  deploy-layers:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.layers == 'true'
+    uses: ./.github/workflows/deploy-layers.yml
+    secrets: inherit
