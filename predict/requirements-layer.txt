@@ -1,6 +1,0 @@
-pandas
-lightgbm
-geopy
-
-matplotlib
-scikit-learn

@@ -24,31 +24,42 @@ jobs:
         with:
           python-version: '3.11'
       
-      - name: Build packages
+      - name: Get latest layer ARNs
+        id: layers
+        run: |
+          # Fetch latest layer versions
+          SHARED=$(aws lambda list-layer-versions --layer-name shared --query 'LayerVersions[0].LayerVersionArn' --output text)
+          ML1=$(aws lambda list-layer-versions --layer-name ml1 --query 'LayerVersions[0].LayerVersionArn' --output text)
+          ML2=$(aws lambda list-layer-versions --layer-name ml2 --query 'LayerVersions[0].LayerVersionArn' --output text)
+          ML3=$(aws lambda list-layer-versions --layer-name ml3 --query 'LayerVersions[0].LayerVersionArn' --output text)
+          OCR1=$(aws lambda list-layer-versions --layer-name ocr1 --query 'LayerVersions[0].LayerVersionArn' --output text)
+          OCR2=$(aws lambda list-layer-versions --layer-name ocr2 --query 'LayerVersions[0].LayerVersionArn' --output text)
+          OCR3=$(aws lambda list-layer-versions --layer-name ocr3 --query 'LayerVersions[0].LayerVersionArn' --output text)
+          
+          echo "SHARED_LAYER=$SHARED" >> $GITHUB_ENV
+          echo "ML1_LAYER=$ML1" >> $GITHUB_ENV
+          echo "ML2_LAYER=$ML2" >> $GITHUB_ENV
+          echo "ML3_LAYER=$ML3" >> $GITHUB_ENV
+          echo "OCR1_LAYER=$OCR1" >> $GITHUB_ENV
+          echo "OCR2_LAYER=$OCR2" >> $GITHUB_ENV
+          echo "OCR3_LAYER=$OCR3" >> $GITHUB_ENV
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+      
+      - name: Build app package
         working-directory: ${{ inputs.working-directory }}
         run: |
-          rm -rf ./package ./layer
-          mkdir -p ./package ./layer/python
+          rm -rf ./package
+          mkdir -p ./package
           
-          if [ -f "requirements-layer.txt" ]; then
-            echo "📦 Installing layer dependencies..."
-            pip install --platform manylinux2014_x86_64 --only-binary=:all: \
-              -r requirements-layer.txt -t ./layer/python || exit 1
-          fi
-          
-          echo "📦 Installing app dependencies..."
           pip install --platform manylinux2014_x86_64 --only-binary=:all: \
-            -r requirements.txt -t ./package || exit 1
+            -r requirements.txt -t ./package
           
-          if [ -d "src" ]; then
-            cp -r src ./package/
-          else
-            echo "❌ src directory not found"
-            exit 1
-          fi
-          
-          [ -f "lambda_handler.py" ] && cp lambda_handler.py ./package/ || true    
-     
+          [ -d "src" ] && cp -r src ./package/
+          [ -f "lambda_handler.py" ] && cp lambda_handler.py ./package/
+      
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -62,39 +73,13 @@ jobs:
         run: |
           aws s3 cp s3://${{ secrets.AWS_BUCKET_NAME }}/model_artifacts/lightgbm_model.txt ./
       
-      - name: Create and publish layer
-        working-directory: ${{ inputs.working-directory }}
-        run: |
-          if [ -d "./layer/python" ] && [ "$(ls -A ./layer/python)" ]; then
-            cd layer
-            zip -r9 ../layer.zip . -x "*.pyc" "*__pycache__*" "*.dist-info/*"
-            cd ..
-            
-            LAYER_NAME="${{ inputs.function-name }}-deps"
-            echo "🚀 Publishing layer: $LAYER_NAME"
-            
-            LAYER_VERSION=$(aws lambda publish-layer-version \
-              --layer-name "$LAYER_NAME" \
-              --zip-file fileb://layer.zip \
-              --compatible-runtimes python3.11 \
-              --query 'Version' --output text)
-            
-            echo "LAYER_ARN=arn:aws:lambda:${{ secrets.AWS_REGION }}:${{ secrets.AWS_ACCOUNT_ID }}:layer:$LAYER_NAME:$LAYER_VERSION" >> $GITHUB_ENV
-            echo "✅ Layer published: version $LAYER_VERSION"
-          else
-            echo "⚠️ No layer dependencies found"
-            echo "LAYER_ARN=" >> $GITHUB_ENV
-          fi
-      
       - name: Create deployment package
         working-directory: ${{ inputs.working-directory }}/package
         run: |
           find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
           find . -type d -name "*.dist-info" -exec rm -rf {} + 2>/dev/null || true
-          find . -type d -name "tests" -exec rm -rf {} + 2>/dev/null || true
           find . -type f -name "*.pyc" -delete
-          find . -type f -name "*.pyo" -delete
-          zip -r9 ../deployment.zip . -x "*.pyc" "*__pycache__*"
+          zip -r9 ../deployment.zip .
       
       - name: Check size
         working-directory: ${{ inputs.working-directory }}
@@ -104,42 +89,46 @@ jobs:
           echo "📦 Package: ${SIZE_MB}MB"
           
           if [ $SIZE_BYTES -gt 52428800 ]; then
-            echo "❌ Package too large: ${SIZE_MB}MB (limit: 50MB)"
+            echo "❌ Package: ${SIZE_MB}MB (limit: 50MB)"
             exit 1
           fi
-          echo "✅ Size OK"
+      
+      - name: Determine layers
+        id: determine-layers
+        run: |
+          FUNC_NAME="${{ inputs.function-name }}"
+          
+          if [[ "$FUNC_NAME" == "warp" ]]; then
+            LAYERS="$SHARED_LAYER $OCR1_LAYER $OCR2_LAYER $OCR3_LAYER"
+          elif [[ "$FUNC_NAME" == "ocr" ]]; then
+            LAYERS="$SHARED_LAYER $OCR1_LAYER $OCR2_LAYER $OCR3_LAYER"
+          elif [[ "$FUNC_NAME" == "predict" ]] || [[ "$FUNC_NAME" == "train" ]] || [[ "$FUNC_NAME" == "cron" ]]; then
+            LAYERS="$SHARED_LAYER $ML1_LAYER $ML2_LAYER $ML3_LAYER"
+          else
+            LAYERS="$SHARED_LAYER"
+          fi
+          
+          echo "LAYERS=$LAYERS" >> $GITHUB_ENV
+          echo "✅ Layers: $LAYERS"
       
       - name: Update function code
         working-directory: ${{ inputs.working-directory }}
         run: |
           FUNC="${{ secrets[format('AWS_LAMBDA_{0}_FUNCTION_NAME', inputs.function-name)] }}"
-          echo "🚀 Updating function: $FUNC"
           
           aws lambda update-function-code \
             --function-name "$FUNC" \
             --zip-file fileb://deployment.zip
           
           aws lambda wait function-updated --function-name "$FUNC"
-          echo "✅ Code updated"
       
       - name: Update function config
         run: |
           FUNC="${{ secrets[format('AWS_LAMBDA_{0}_FUNCTION_NAME', inputs.function-name)] }}"
           
-          if [ -n "$LAYER_ARN" ]; then
-            echo "🔧 Updating config with layer: $LAYER_ARN"
-            aws lambda update-function-configuration \
-              --function-name "$FUNC" \
-              --layers "$LAYER_ARN" \
-              --timeout 900 \
-              --memory-size 3008 \
-              --environment "Variables={MODEL_PATH=/var/task/lightgbm_model.txt,DATABASE_URL=${{ secrets.DATABASE_URL }},BUCKET_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }},BUCKET_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }},BUCKET_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }},BUCKET_NAME=${{ secrets.AWS_BUCKET_NAME }},BUCKET_REGION=${{ secrets.AWS_REGION }},OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }},WARP_KEY=${{ secrets.WARP_KEY }},SMTP_HOST=${{ secrets.SMTP_HOST }},SMTP_PORT=${{ secrets.SMTP_PORT }},SMTP_USERNAME=${{ secrets.SMTP_USERNAME }},SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }},SMTP_FROM_EMAIL=${{ secrets.SMTP_FROM_EMAIL }},SMTP_FROM_NAME=${{ secrets.SMTP_FROM_NAME }},ADMIN_URL=${{ secrets.ADMIN_URL }},WARP_URL=${{ secrets.WARP_URL }}}"
-          else
-            echo "🔧 Updating config without layer"
-            aws lambda update-function-configuration \
-              --function-name "$FUNC" \
-              --timeout 900 \
-              --memory-size 3008 \
-              --environment "Variables={MODEL_PATH=/var/task/lightgbm_model.txt,DATABASE_URL=${{ secrets.DATABASE_URL }},BUCKET_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }},BUCKET_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }},BUCKET_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }},BUCKET_NAME=${{ secrets.AWS_BUCKET_NAME }},BUCKET_REGION=${{ secrets.AWS_REGION }},OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }},WARP_KEY=${{ secrets.WARP_KEY }},SMTP_HOST=${{ secrets.SMTP_HOST }},SMTP_PORT=${{ secrets.SMTP_PORT }},SMTP_USERNAME=${{ secrets.SMTP_USERNAME }},SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }},SMTP_FROM_EMAIL=${{ secrets.SMTP_FROM_EMAIL }},SMTP_FROM_NAME=${{ secrets.SMTP_FROM_NAME }},ADMIN_URL=${{ secrets.ADMIN_URL }},WARP_URL=${{ secrets.WARP_URL }}}"
-          fi
-          echo "✅ Config updated"
+          aws lambda update-function-configuration \
+            --function-name "$FUNC" \
+            --layers $LAYERS \
+            --timeout 900 \
+            --memory-size 3008 \
+            --environment "Variables={MODEL_PATH=/var/task/lightgbm_model.txt,DATABASE_URL=${{ secrets.DATABASE_URL }},BUCKET_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }},BUCKET_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }},BUCKET_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }},BUCKET_NAME=${{ secrets.AWS_BUCKET_NAME }},BUCKET_REGION=${{ secrets.AWS_REGION }},OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }},WARP_KEY=${{ secrets.WARP_KEY }},SMTP_HOST=${{ secrets.SMTP_HOST }},SMTP_PORT=${{ secrets.SMTP_PORT }},SMTP_USERNAME=${{ secrets.SMTP_USERNAME }},SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }},SMTP_FROM_EMAIL=${{ secrets.SMTP_FROM_EMAIL }},SMTP_FROM_NAME=${{ secrets.SMTP_FROM_NAME }},ADMIN_URL=${{ secrets.ADMIN_URL }},WARP_URL=${{ secrets.WARP_URL }}}"

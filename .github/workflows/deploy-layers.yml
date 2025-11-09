@@ -1,0 +1,272 @@
+name: Deploy Lambda Layers
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'shared/*_requirement_layer.txt'
+  workflow_dispatch:
+
+jobs:
+  detect-layer-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      shared: ${{ steps.filter.outputs.shared }}
+      ml1: ${{ steps.filter.outputs.ml1 }}
+      ml2: ${{ steps.filter.outputs.ml2 }}
+      ml3: ${{ steps.filter.outputs.ml3 }}
+      ocr1: ${{ steps.filter.outputs.ocr1 }}
+      ocr2: ${{ steps.filter.outputs.ocr2 }}
+      ocr3: ${{ steps.filter.outputs.ocr3 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            shared: 'shared/shared_requirement_layer.txt'
+            ml1: 'shared/ml_requirement_layer_1.txt'
+            ml2: 'shared/ml_requirement_layer_2.txt'
+            ml3: 'shared/ml_requirement_layer_3.txt'
+            ocr1: 'shared/ocr_requirement_layer_1.txt'
+            ocr2: 'shared/ocr_requirement_layer_2.txt'
+            ocr3: 'shared/ocr_requirement_layer_3.txt'
+
+  deploy-shared-layer:
+    needs: detect-layer-changes
+    if: needs.detect-layer-changes.outputs.shared == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Build layer
+        run: |
+          mkdir -p layer/python
+          pip install --platform manylinux2014_x86_64 --only-binary=:all: \
+            -r shared/shared_requirement_layer.txt -t layer/python
+          cd layer
+          zip -r9 ../layer.zip . -x "*.pyc" "*__pycache__*" "*.dist-info/*"
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      
+      - name: Publish layer
+        run: |
+          LAYER_ARN=$(aws lambda publish-layer-version \
+            --layer-name shared \
+            --zip-file fileb://layer.zip \
+            --compatible-runtimes python3.11 \
+            --query 'LayerVersionArn' --output text)
+          echo "✅ Published: $LAYER_ARN"
+          echo "SHARED_LAYER_ARN=$LAYER_ARN" >> $GITHUB_ENV
+
+  deploy-ml1-layer:
+    needs: detect-layer-changes
+    if: needs.detect-layer-changes.outputs.ml1 == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Build layer
+        run: |
+          mkdir -p layer/python
+          pip install --platform manylinux2014_x86_64 --only-binary=:all: \
+            -r shared/ml_requirement_layer_1.txt -t layer/python
+          cd layer
+          zip -r9 ../layer.zip . -x "*.pyc" "*__pycache__*" "*.dist-info/*"
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      
+      - name: Publish layer
+        run: |
+          LAYER_ARN=$(aws lambda publish-layer-version \
+            --layer-name ml1 \
+            --zip-file fileb://layer.zip \
+            --compatible-runtimes python3.11 \
+            --query 'LayerVersionArn' --output text)
+          echo "✅ Published: $LAYER_ARN"
+
+  deploy-ml2-layer:
+    needs: detect-layer-changes
+    if: needs.detect-layer-changes.outputs.ml2 == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Build layer
+        run: |
+          mkdir -p layer/python
+          pip install --platform manylinux2014_x86_64 --only-binary=:all: \
+            -r shared/ml_requirement_layer_2.txt -t layer/python
+          cd layer
+          zip -r9 ../layer.zip . -x "*.pyc" "*__pycache__*" "*.dist-info/*"
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      
+      - name: Publish layer
+        run: |
+          LAYER_ARN=$(aws lambda publish-layer-version \
+            --layer-name ml2 \
+            --zip-file fileb://layer.zip \
+            --compatible-runtimes python3.11 \
+            --query 'LayerVersionArn' --output text)
+          echo "✅ Published: $LAYER_ARN"
+
+  deploy-ml3-layer:
+    needs: detect-layer-changes
+    if: needs.detect-layer-changes.outputs.ml3 == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Build layer
+        run: |
+          mkdir -p layer/python
+          pip install --platform manylinux2014_x86_64 --only-binary=:all: \
+            -r shared/ml_requirement_layer_3.txt -t layer/python
+          cd layer
+          zip -r9 ../layer.zip . -x "*.pyc" "*__pycache__*" "*.dist-info/*"
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      
+      - name: Publish layer
+        run: |
+          LAYER_ARN=$(aws lambda publish-layer-version \
+            --layer-name ml3 \
+            --zip-file fileb://layer.zip \
+            --compatible-runtimes python3.11 \
+            --query 'LayerVersionArn' --output text)
+          echo "✅ Published: $LAYER_ARN"
+
+  deploy-ocr1-layer:
+    needs: detect-layer-changes
+    if: needs.detect-layer-changes.outputs.ocr1 == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Build layer
+        run: |
+          mkdir -p layer/python
+          pip install --platform manylinux2014_x86_64 --only-binary=:all: \
+            -r shared/ocr_requirement_layer_1.txt -t layer/python
+          cd layer
+          zip -r9 ../layer.zip . -x "*.pyc" "*__pycache__*" "*.dist-info/*"
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      
+      - name: Publish layer
+        run: |
+          LAYER_ARN=$(aws lambda publish-layer-version \
+            --layer-name ocr1 \
+            --zip-file fileb://layer.zip \
+            --compatible-runtimes python3.11 \
+            --query 'LayerVersionArn' --output text)
+          echo "✅ Published: $LAYER_ARN"
+
+  deploy-ocr2-layer:
+    needs: detect-layer-changes
+    if: needs.detect-layer-changes.outputs.ocr2 == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Build layer
+        run: |
+          mkdir -p layer/python
+          pip install --platform manylinux2014_x86_64 --only-binary=:all: \
+            -r shared/ocr_requirement_layer_2.txt -t layer/python
+          cd layer
+          zip -r9 ../layer.zip . -x "*.pyc" "*__pycache__*" "*.dist-info/*"
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      
+      - name: Publish layer
+        run: |
+          LAYER_ARN=$(aws lambda publish-layer-version \
+            --layer-name ocr2 \
+            --zip-file fileb://layer.zip \
+            --compatible-runtimes python3.11 \
+            --query 'LayerVersionArn' --output text)
+          echo "✅ Published: $LAYER_ARN"
+
+  deploy-ocr3-layer:
+    needs: detect-layer-changes
+    if: needs.detect-layer-changes.outputs.ocr3 == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Build layer
+        run: |
+          mkdir -p layer/python
+          pip install --platform manylinux2014_x86_64 --only-binary=:all: \
+            -r shared/ocr_requirement_layer_3.txt -t layer/python
+          cd layer
+          zip -r9 ../layer.zip . -x "*.pyc" "*__pycache__*" "*.dist-info/*"
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      
+      - name: Publish layer
+        run: |
+          LAYER_ARN=$(aws lambda publish-layer-version \
+            --layer-name ocr3 \
+            --zip-file fileb://layer.zip \
+            --compatible-runtimes python3.11 \
+            --query 'LayerVersionArn' --output text)
+          echo "✅ Published: $LAYER_ARN"
