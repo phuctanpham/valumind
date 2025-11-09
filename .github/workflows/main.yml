@@ -130,6 +130,6 @@ jobs:
 
   deploy-layers:
     needs: detect-changes
-    if: needs.detect-changes.outputs.layers == 'true'
+    if: needs.detect-changes.outputs.shared == 'true'
     uses: ./.github/workflows/deploy-layers.yml
     secrets: inherit
