@@ -28,46 +28,22 @@ jobs:
       - name: Detect changes
         id: changes
         run: |
-          if git diff --name-only HEAD~1 HEAD | grep -q "shared/shared_requirement_layer.txt"; then
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "shared=true" >> $GITHUB_OUTPUT
-          else
-            echo "shared=false" >> $GITHUB_OUTPUT
-          fi
-          
-          if git diff --name-only HEAD~1 HEAD | grep -q "shared/ml_requirement_layer_1.txt"; then
             echo "ml1=true" >> $GITHUB_OUTPUT
-          else
-            echo "ml1=false" >> $GITHUB_OUTPUT
-          fi
-          
-          if git diff --name-only HEAD~1 HEAD | grep -q "shared/ml_requirement_layer_2.txt"; then
             echo "ml2=true" >> $GITHUB_OUTPUT
-          else
-            echo "ml2=false" >> $GITHUB_OUTPUT
-          fi
-          
-          if git diff --name-only HEAD~1 HEAD | grep -q "shared/ml_requirement_layer_3.txt"; then
             echo "ml3=true" >> $GITHUB_OUTPUT
-          else
-            echo "ml3=false" >> $GITHUB_OUTPUT
-          fi
-          
-          if git diff --name-only HEAD~1 HEAD | grep -q "shared/ocr_requirement_layer_1.txt"; then
             echo "ocr1=true" >> $GITHUB_OUTPUT
-          else
-            echo "ocr1=false" >> $GITHUB_OUTPUT
-          fi
-          
-          if git diff --name-only HEAD~1 HEAD | grep -q "shared/ocr_requirement_layer_2.txt"; then
             echo "ocr2=true" >> $GITHUB_OUTPUT
-          else
-            echo "ocr2=false" >> $GITHUB_OUTPUT
-          fi
-          
-          if git diff --name-only HEAD~1 HEAD | grep -q "shared/ocr_requirement_layer_3.txt"; then
             echo "ocr3=true" >> $GITHUB_OUTPUT
           else
-            echo "ocr3=false" >> $GITHUB_OUTPUT
+            git diff --name-only HEAD~1 HEAD | grep -q "shared/shared_requirement_layer.txt" && echo "shared=true" >> $GITHUB_OUTPUT || echo "shared=false" >> $GITHUB_OUTPUT
+            git diff --name-only HEAD~1 HEAD | grep -q "shared/ml_requirement_layer_1.txt" && echo "ml1=true" >> $GITHUB_OUTPUT || echo "ml1=false" >> $GITHUB_OUTPUT
+            git diff --name-only HEAD~1 HEAD | grep -q "shared/ml_requirement_layer_2.txt" && echo "ml2=true" >> $GITHUB_OUTPUT || echo "ml2=false" >> $GITHUB_OUTPUT
+            git diff --name-only HEAD~1 HEAD | grep -q "shared/ml_requirement_layer_3.txt" && echo "ml3=true" >> $GITHUB_OUTPUT || echo "ml3=false" >> $GITHUB_OUTPUT
+            git diff --name-only HEAD~1 HEAD | grep -q "shared/ocr_requirement_layer_1.txt" && echo "ocr1=true" >> $GITHUB_OUTPUT || echo "ocr1=false" >> $GITHUB_OUTPUT
+            git diff --name-only HEAD~1 HEAD | grep -q "shared/ocr_requirement_layer_2.txt" && echo "ocr2=true" >> $GITHUB_OUTPUT || echo "ocr2=false" >> $GITHUB_OUTPUT
+            git diff --name-only HEAD~1 HEAD | grep -q "shared/ocr_requirement_layer_3.txt" && echo "ocr3=true" >> $GITHUB_OUTPUT || echo "ocr3=false" >> $GITHUB_OUTPUT
           fi
 
   deploy-shared-layer:
