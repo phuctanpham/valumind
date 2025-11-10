@@ -1,16 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import type { CellItem } from '../App';
 import './DetailTab.css';
-
-const availableFields = [
-  'Land Area (m2)',
-  'Usable Area (m2)',
-  'Bedrooms',
-  'Width (m)',
-  'Length (m)',
-  'Total Floors',
-];
 
 interface DetailTabProps {
   selectedItem: CellItem;
@@ -22,7 +12,6 @@ interface DetailTabProps {
 
 export default function DetailTab({ selectedItem, onUpdate, isEditing, onSave, onCancel }: DetailTabProps) {
   const [editedFields, setEditedFields] = useState<any>(null);
-  const [selectedField, setSelectedField] = useState('');
 
   useEffect(() => {
     if (selectedItem) {
@@ -38,19 +27,6 @@ export default function DetailTab({ selectedItem, onUpdate, isEditing, onSave, o
   if (!editedFields) {
     return null;
   }
-
-  const handleAddField = () => {
-    if (selectedField && !editedFields.customFields.hasOwnProperty(selectedField)) {
-      const newCustomFields = { ...editedFields.customFields, [selectedField]: '' };
-      setEditedFields({ ...editedFields, customFields: newCustomFields });
-      setSelectedField('');
-    }
-  };
-
-  const handleRemoveField = (field: string) => {
-    const { [field]: _, ...remainingCustomFields } = editedFields.customFields;
-    setEditedFields({ ...editedFields, customFields: remainingCustomFields });
-  };
   
   const handleFieldChange = (field: string, value: string) => {
     setEditedFields({ ...editedFields, [field]: value });
@@ -117,33 +93,15 @@ export default function DetailTab({ selectedItem, onUpdate, isEditing, onSave, o
       </div>
       <div className="custom-fields-section">
         <h4>Custom Fields</h4>
-        {isEditing && (
-            <div className="add-field-container">
-            <select value={selectedField} onChange={(e) => setSelectedField(e.target.value)}>
-                <option value="">Select a field</option>
-                {availableFields
-                .filter((field) => !editedFields.customFields.hasOwnProperty(field))
-                .map((field) => (
-                    <option key={field} value={field}>
-                    {field}
-                    </option>
-                ))}
-            </select>
-            <button onClick={handleAddField} disabled={!selectedField}>Add Field</button>
-            </div>
-        )}
         {Object.entries(editedFields.customFields).map(([field, value]) => (
           <div className="form-field custom" key={field}>
             <label>{field}</label>
-            <div className="custom-field-input">
-              <input
-                type="text"
-                value={value as string}
-                onChange={(e) => handleCustomFieldChange(field, e.target.value)}
-                readOnly={!isEditing}
-              />
-              {isEditing && <button className="remove-btn" onClick={() => handleRemoveField(field)}>✕</button>}
-            </div>
+            <input
+              type="text"
+              value={value as string}
+              onChange={(e) => handleCustomFieldChange(field, e.target.value)}
+              readOnly={!isEditing}
+            />
           </div>
         ))}
       </div>

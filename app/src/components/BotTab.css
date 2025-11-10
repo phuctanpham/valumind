@@ -1,4 +1,3 @@
-
 .chat-view {
   display: flex;
   flex-direction: column;
@@ -7,18 +6,20 @@
 
 .chat-header {
   padding: 12px;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid #404040;
+  background-color: rgba(255, 255, 255, 0.02);
 }
 
 .chat-header h4 {
   margin: 0;
   font-size: 1.1em;
+  color: #fff;
 }
 
 .chat-subtitle {
   margin: 4px 0 0;
   font-size: 0.9em;
-  color: #666;
+  color: #ccc;
 }
 
 .chat-messages {
@@ -28,6 +29,7 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+  background-color: #323232;
 }
 
 .chat-message {
@@ -57,7 +59,9 @@
 }
 
 .chat-message.bot .message-content {
-  background-color: #f0f0f0;
+  background-color: transparent;
+  color: #fff;
+  border: 1px solid #555;
   border-top-left-radius: 4px;
 }
 
@@ -71,21 +75,24 @@
 .chat-input-form {
   display: flex;
   padding: 12px;
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid #404040;
+  background-color: rgba(255, 255, 255, 0.02);
 }
 
 .chat-input {
   flex-grow: 1;
-  border: 1px solid #ccc;
+  border: 1px solid #555;
   border-radius: 16px;
   padding: 8px 12px;
   font-size: 1em;
   margin-right: 8px;
+  background-color: #404040;
+  color: #fff;
 }
 
 .chat-input:focus {
   outline: none;
-  border-color: #007bff;
+  border-color: #4CAF50;
 }
 
 .btn.btn-primary {

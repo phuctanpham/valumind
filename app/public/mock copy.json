@@ -1,7 +1,7 @@
 {
   "item-1": {
     "id": "item-1",
-    "avatar": "https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=150&h=150&fit=crop",
+    "avatar": "https://i.pravatar.cc/150?img=1",
     "address": "101 Đ. Nguyễn Huệ, Bến Nghé, Quận 1, Thành phố Hồ Chí Minh",
     "lat": 10.7752,
     "lng": 106.7031,
@@ -52,25 +52,11 @@
     "activityLogs": [
       { "activity": "Hồ sơ vay vốn đã được nộp để xem xét lần cuối.", "timestamp": "2024-07-30T11:02:00Z" },
       { "activity": "Yêu cầu tài liệu bổ sung: Bằng chứng về thu nhập.", "timestamp": "2024-07-31T15:30:00Z" }
-    ],
-    "customFields": {
-      "size": "85.5",
-      "longitude": "106.7031",
-      "latitude": "10.7752",
-      "living size": "250.0",
-      "width": "5.0",
-      "length": "17.1",
-      "rooms": "4",
-      "toilets": "3",
-      "floors": "3",
-      "category": "Nhà riêng",
-      "region": "Thành phố Hồ Chí Minh",
-      "area": "Quận 1"
-    }
+    ]
   },
   "item-2": {
     "id": "item-2",
-    "avatar": "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=150&h=150&fit=crop",
+    "avatar": "https://i.pravatar.cc/150?img=2",
     "address": "285 Đ. Cách Mạng Tháng 8, Phường 12, Quận 10, Thành phố Hồ Chí Minh",
     "lat": 10.7798,
     "lng": 106.6749,
@@ -119,25 +105,11 @@
     "activityLogs": [
       { "activity": "Hồ sơ vay vốn bị từ chối. Lý do: Không đủ giấy tờ.", "timestamp": "2024-08-01T14:00:00Z" },
       { "activity": "Người dùng đã xem lại các yêu cầu về tài liệu.", "timestamp": "2024-08-02T10:00:00Z" }
-    ],
-    "customFields": {
-      "size": "120.0",
-      "longitude": "106.6749",
-      "latitude": "10.7798",
-      "living size": "280.0",
-      "width": "6.0",
-      "length": "20.0",
-      "rooms": "5",
-      "toilets": "4",
-      "floors": "4",
-      "category": "Nhà mặt tiền",
-      "region": "Thành phố Hồ Chí Minh",
-      "area": "Quận 10"
-    }
+    ]
   },
   "item-3": {
     "id": "item-3",
-    "avatar": "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=150&h=150&fit=crop",
+    "avatar": "https://i.pravatar.cc/150?img=3",
     "address": "8A Đ. Thái Văn Lung, Bến Nghé, Quận 1, Thành phố Hồ Chí Minh",
     "lat": 10.7791,
     "lng": 106.7042,
@@ -169,20 +141,6 @@
     ],
     "activityLogs": [
       { "activity": "Hồ sơ vay vốn đã được nộp để xem xét lần cuối.", "timestamp": "2024-07-30T11:02:00Z" }
-    ],
-    "customFields": {
-      "size": "100.0",
-      "longitude": "106.7042",
-      "latitude": "10.7791",
-      "living size": "320.0",
-      "width": "4.5",
-      "length": "22.2",
-      "rooms": "6",
-      "toilets": "5",
-      "floors": "5",
-      "category": "Biệt thự",
-      "region": "Thành phố Hồ Chí Minh",
-      "area": "Quận 1"
-    }
+    ]
   }
 }

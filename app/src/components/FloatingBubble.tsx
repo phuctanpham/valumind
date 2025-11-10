@@ -4,10 +4,12 @@ import './FloatingBubble.css';
 
 interface FloatingBubbleProps {
   onAdd: (item: Omit<CellItem, 'id' | 'syncStatus'>) => void;
+  isMobile: boolean;
 }
 
 export default function FloatingBubble({
   onAdd,
+  isMobile,
 }: FloatingBubbleProps) {
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
@@ -15,6 +17,18 @@ export default function FloatingBubble({
     address: '',
     certificateNumber: '',
     owner: '',
+    size: '',
+    longitude: '',
+    latitude: '',
+    livingSize: '',
+    width: '',
+    length: '',
+    rooms: '',
+    toilets: '',
+    floors: '',
+    category: '',
+    region: '',
+    area: '',
   });
 
   const handleClick = () => {
@@ -34,10 +48,28 @@ export default function FloatingBubble({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    const customFields: { [key: string]: string } = {};
+    if (formData.size) customFields['size'] = formData.size;
+    if (formData.longitude) customFields['longitude'] = formData.longitude;
+    if (formData.latitude) customFields['latitude'] = formData.latitude;
+    if (formData.livingSize) customFields['living size'] = formData.livingSize;
+    if (formData.width) customFields['width'] = formData.width;
+    if (formData.length) customFields['length'] = formData.length;
+    if (formData.rooms) customFields['rooms'] = formData.rooms;
+    if (formData.toilets) customFields['toilets'] = formData.toilets;
+    if (formData.floors) customFields['floors'] = formData.floors;
+    if (formData.category) customFields['category'] = formData.category;
+    if (formData.region) customFields['region'] = formData.region;
+    if (formData.area) customFields['area'] = formData.area;
+
     const newItem: Omit<CellItem, 'id' | 'syncStatus'> = {
-      ...formData,
-      lat: 0, // Placeholder, will be updated on sync
-      lng: 0, // Placeholder, will be updated on sync
+      avatar: formData.avatar,
+      address: formData.address,
+      certificateNumber: formData.certificateNumber,
+      owner: formData.owner,
+      lat: 0,
+      lng: 0,
       valuation: {
         aiModel: 'N/A',
         confidenceScore: 0,
@@ -49,11 +81,33 @@ export default function FloatingBubble({
       nearbyValuations: [],
       chatHistory: [],
       activityLogs: [],
+      customFields,
     };
     onAdd(newItem);
-    setFormData({ avatar: '', address: '', certificateNumber: '', owner: '' });
+    setFormData({
+      avatar: '',
+      address: '',
+      certificateNumber: '',
+      owner: '',
+      size: '',
+      longitude: '',
+      latitude: '',
+      livingSize: '',
+      width: '',
+      length: '',
+      rooms: '',
+      toilets: '',
+      floors: '',
+      category: '',
+      region: '',
+      area: '',
+    });
     setShowModal(false);
   };
+
+  if (!isMobile) {
+    return null;
+  }
 
   return (
     <>
@@ -124,6 +178,163 @@ export default function FloatingBubble({
                   required
                 />
               </div>
+
+              <div className="form-field">
+                <label htmlFor="size">Size (m²)</label>
+                <input
+                  id="size"
+                  type="text"
+                  placeholder="e.g., 85.5"
+                  value={formData.size}
+                  onChange={(e) => setFormData({ ...formData, size: e.target.value })}
+                  onFocus={(e) => e.target.placeholder = ''}
+                  onBlur={(e) => e.target.placeholder = 'e.g., 85.5'}
+                />
+              </div>
+
+              <div className="form-field">
+                <label htmlFor="longitude">Longitude</label>
+                <input
+                  id="longitude"
+                  type="text"
+                  placeholder="e.g., 105.80"
+                  value={formData.longitude}
+                  onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
+                  onFocus={(e) => e.target.placeholder = ''}
+                  onBlur={(e) => e.target.placeholder = 'e.g., 105.80'}
+                />
+              </div>
+
+              <div className="form-field">
+                <label htmlFor="latitude">Latitude</label>
+                <input
+                  id="latitude"
+                  type="text"
+                  placeholder="e.g., 21.01"
+                  value={formData.latitude}
+                  onChange={(e) => setFormData({ ...formData, latitude: e.target.value })}
+                  onFocus={(e) => e.target.placeholder = ''}
+                  onBlur={(e) => e.target.placeholder = 'e.g., 21.01'}
+                />
+              </div>
+
+              <div className="form-field">
+                <label htmlFor="livingSize">Living Size (m²)</label>
+                <input
+                  id="livingSize"
+                  type="text"
+                  placeholder="e.g., 250.0"
+                  value={formData.livingSize}
+                  onChange={(e) => setFormData({ ...formData, livingSize: e.target.value })}
+                  onFocus={(e) => e.target.placeholder = ''}
+                  onBlur={(e) => e.target.placeholder = 'e.g., 250.0'}
+                />
+              </div>
+
+              <div className="form-field">
+                <label htmlFor="width">Width (m)</label>
+                <input
+                  id="width"
+                  type="text"
+                  placeholder="e.g., 5.0"
+                  value={formData.width}
+                  onChange={(e) => setFormData({ ...formData, width: e.target.value })}
+                  onFocus={(e) => e.target.placeholder = ''}
+                  onBlur={(e) => e.target.placeholder = 'e.g., 5.0'}
+                />
+              </div>
+
+              <div className="form-field">
+                <label htmlFor="length">Length (m)</label>
+                <input
+                  id="length"
+                  type="text"
+                  placeholder="e.g., 17.1"
+                  value={formData.length}
+                  onChange={(e) => setFormData({ ...formData, length: e.target.value })}
+                  onFocus={(e) => e.target.placeholder = ''}
+                  onBlur={(e) => e.target.placeholder = 'e.g., 17.1'}
+                />
+              </div>
+
+              <div className="form-field">
+                <label htmlFor="rooms">Rooms</label>
+                <input
+                  id="rooms"
+                  type="text"
+                  placeholder="e.g., 4"
+                  value={formData.rooms}
+                  onChange={(e) => setFormData({ ...formData, rooms: e.target.value })}
+                  onFocus={(e) => e.target.placeholder = ''}
+                  onBlur={(e) => e.target.placeholder = 'e.g., 4'}
+                />
+              </div>
+
+              <div className="form-field">
+                <label htmlFor="toilets">Toilets</label>
+                <input
+                  id="toilets"
+                  type="text"
+                  placeholder="e.g., 3"
+                  value={formData.toilets}
+                  onChange={(e) => setFormData({ ...formData, toilets: e.target.value })}
+                  onFocus={(e) => e.target.placeholder = ''}
+                  onBlur={(e) => e.target.placeholder = 'e.g., 3'}
+                />
+              </div>
+
+              <div className="form-field">
+                <label htmlFor="floors">Floors</label>
+                <input
+                  id="floors"
+                  type="text"
+                  placeholder="e.g., 3"
+                  value={formData.floors}
+                  onChange={(e) => setFormData({ ...formData, floors: e.target.value })}
+                  onFocus={(e) => e.target.placeholder = ''}
+                  onBlur={(e) => e.target.placeholder = 'e.g., 3'}
+                />
+              </div>
+
+              <div className="form-field">
+                <label htmlFor="category">Category</label>
+                <input
+                  id="category"
+                  type="text"
+                  placeholder="e.g., Nhà riêng"
+                  value={formData.category}
+                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                  onFocus={(e) => e.target.placeholder = ''}
+                  onBlur={(e) => e.target.placeholder = 'e.g., Nhà riêng'}
+                />
+              </div>
+
+              <div className="form-field">
+                <label htmlFor="region">Region</label>
+                <input
+                  id="region"
+                  type="text"
+                  placeholder="e.g., Hà Nội"
+                  value={formData.region}
+                  onChange={(e) => setFormData({ ...formData, region: e.target.value })}
+                  onFocus={(e) => e.target.placeholder = ''}
+                  onBlur={(e) => e.target.placeholder = 'e.g., Hà Nội'}
+                />
+              </div>
+
+              <div className="form-field">
+                <label htmlFor="area">Area</label>
+                <input
+                  id="area"
+                  type="text"
+                  placeholder="e.g., Quận Ba Đình"
+                  value={formData.area}
+                  onChange={(e) => setFormData({ ...formData, area: e.target.value })}
+                  onFocus={(e) => e.target.placeholder = ''}
+                  onBlur={(e) => e.target.placeholder = 'e.g., Quận Ba Đình'}
+                />
+              </div>
+
               <div className="form-actions">
                 <button type="submit" className="btn btn-primary">
                   Add Item
