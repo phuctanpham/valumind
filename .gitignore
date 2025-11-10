@@ -27,7 +27,7 @@
 **/*.sublime-project
 **/*.sublime-workspace
 **/.idx
-#**/.firebaserc
+**/.firebaserc
 # Build output directories
 **/dist/
 **/build/
@@ -35,7 +35,7 @@
 **/.next/
 
 # Log files
-#**/*.log
+**/*.log
 **/npm-debug.log*
 **/yarn-debug.log*
 
