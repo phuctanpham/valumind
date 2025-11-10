@@ -16,9 +16,9 @@ auth: auth.vpbank.workers.dev
 
 1. Tổng quan kiến trúc
 2. Cấu trúc thư mục
-3. Chi tiết các module
-4. Kiến trúc CI/CD
-5. Kiến trúc AWS Lambda Layer
+3. Chi tiết các microservices' module
+4. Kiến trúc Monorepos CI/CD
+5. Kiến trúc Multi shared AWS Lambda Layer MLops 
 6. Cài đặt môi trường
 7. Sơ đồ kiến trúc tổng thể
 ```
@@ -28,9 +28,9 @@ auth: auth.vpbank.workers.dev
 Hệ thống AI Asset Valuation là một nền tảng định giá tài sản thông minh sử dụng Machine Learning và OCR, được xây dựng theo kiến trúc Microservices với Monorepo CI/CD và Multi-Layer Lambda Architecture.
 Các thành phần chính:
 
-* Frontend Layer: Admin (Web) + App (Mobile PWA)
-* Gateway Layer: API + Auth
-* Business Logic Layer: Warp (Middle Gateway)
+* Frontend Layer: Admin (SPA) + App (Mobile PWA)
+* Gateway Layer: API (API Gateway) + Auth (IAM)
+* Business Logic Layer: Warp (AI Gateway)
 * AI/ML Services Layer: OCR + Train + Predict
 * Data Layer: Cron (Crawling)
 * Infrastructure Layer: Shared (Lambda Layers) + .github (CI/CD)
