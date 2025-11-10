@@ -282,7 +282,7 @@ predict/
 **Cấu trúc**:  
 ```
 shared/
-├── shared_requirement_layer.txt      # FastAPI, Pydantic (tất cả services)
+├── shared_requirement_layer.txt      # FastAPI, Pydantic
 ├── ml_requirement_layer_1.txt        # Pandas, Numpy
 ├── ml_requirement_layer_2.txt        # LightGBM, Scikit-learn
 ├── ml_requirement_layer_3.txt        # Matplotlib, Geopy
@@ -308,19 +308,22 @@ shared/
 **Công nghệ**: GitHub Actions + Reusable Workflows  
 **Cấu trúc**:  
 ```
-{
-  "estimated_price_vnd": 6150450123,
-  "analysis": {
-    "base_price_vnd": 3517112269,
-    "factors": [
-      {
-        "feature": "area",
-        "value": "Quận 12",
-        "shap_value": 1800500000
-      }
-    ]
-  }
-}
+.github/
+├── actions/                          # Reusable Actions
+│   ├── build-lambda-package/         # Build Lambda ZIP
+│   ├── setup-node/                   # Setup Node.js
+│   └── setup-python/                 # Setup Python
+├── utils/                            # Verification Scripts
+│   ├── aws-lambda.sh                 # Verify AWS Lambda
+│   ├── cloudflare.sh                 # Verify Cloudflare
+│   └── build-layer.sh                # Build Lambda Layer
+└── workflows/                        # GitHub Actions Workflows
+    ├── main.yml                      # Main CI/CD
+    ├── deploy-layers.yml             # Deploy Layers
+    ├── aws-lambda.yml                # Deploy Lambda (single)
+    ├── aws-lambda-with-layer.yml     # Deploy Lambda (with layers)
+    ├── cloudflare-pages.yml          # Deploy CF Pages
+    └── cloudflare-workers.yml        # Deploy CF Workers
 ```
 **Deployment**: github action + aws cli + cloudflare cli  
 
@@ -978,10 +981,10 @@ main
             ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                   BUSINESS LOGIC LAYER                          │
-├─────────────────────────────────────────────────────────────────┤
+├─────────────────────────────────────────────────────────────────┤AI
 │                                                                 │
 │  ┌────────────────────────────────────────────────────────┐     │
-│  │              Warp (Middle Gateway)                     │     │
+│  │                  Warp (AI Gateway)                     │     │
 │  │              Python + FastAPI                          │     │
 │  │              Port: 8000                                │     │
 │  │              AWS Lambda + Function URL                 │     │
