@@ -268,7 +268,7 @@ function App() {
           </>
         )}
       </div>
-      <FloatingBubble isLoggedIn={isLoggedIn} onAdd={handleAddItem} onLoginRequest={() => setAppState('login')} />
+      <FloatingBubble onAdd={handleAddItem} />
       
       {appState === 'login' && (
         <div className="notification-modal">

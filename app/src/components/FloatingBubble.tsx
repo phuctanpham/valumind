@@ -3,15 +3,11 @@ import type { CellItem } from '../App';
 import './FloatingBubble.css';
 
 interface FloatingBubbleProps {
-  isLoggedIn: boolean;
   onAdd: (item: Omit<CellItem, 'id' | 'syncStatus'>) => void;
-  onLoginRequest: () => void;
 }
 
 export default function FloatingBubble({
-  isLoggedIn,
   onAdd,
-  onLoginRequest,
 }: FloatingBubbleProps) {
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
