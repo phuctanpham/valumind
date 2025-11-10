@@ -27,6 +27,7 @@
 **/*.sublime-project
 **/*.sublime-workspace
 **/.idx
+**/.firebasercfirebaserc
 # Build output directories
 **/dist/
 **/build/

@@ -1,6 +1,0 @@
-valumind/
-└── api/ # The backend API.
-    ├── package.json # Defines project metadata and dependencies.
-    ├── wrangler.toml # Cloudflare Wrangler configuration for deployment.
-    └── src/ # Source code for the API.
-        └── main.ts # The entry point of the API.
