@@ -1,4 +1,4 @@
-# Valumind
+## I/ Giới thiệu dự án Valumind
 **Tóm tắt luồng sử dụng:**
 * đăng nhập trang appraiser (ngân hàng) hoặc trang valumind (người vay)
 * gửi hình ảnh và thông tin tài sản vào ứng dụng
@@ -11,8 +11,8 @@ app: valumind.pages.dev
 api: api.vpbank.workers.dev  
 auth: auth.vpbank.workers.dev  
 ```
-
-## I/ Tài liệu kỹ thuật
+`codebase`: https://github.com/phuctanpham/valumind  
+## II/ Tài liệu kỹ thuật
 ```
 📋 Mục lục
 
